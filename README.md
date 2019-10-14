@@ -18,7 +18,7 @@ To install pymol, we recommend using the miniconda python distribution
 (https://docs.conda.io/en/latest/miniconda.html). If miniconda is set up 
 correctly you can install pymol and  MDAnalysis with:
 
-> conda install -c schrodinger pymol <\br>
+> conda install -c schrodinger pymol <br/>
 > conda install -c conda-forge mdanalysis
 
 To open pymols plugin manager, click
