@@ -16,17 +16,17 @@ is published.
 Bridge comes as a pymol plugin and depends on MDAnalysis (0.19.2+). 
 To install pymol, we recommend using the miniconda python distribution 
 (https://docs.conda.io/en/latest/miniconda.html). If miniconda is set up 
-correctly you can install pymol and  MDAnalysis with:
+correctly you can install pymol and MDAnalysis with:
 
 > conda install -c schrodinger pymol <br/>
 > conda install -c conda-forge mdanalysis
 
 To open pymols plugin manager, click
 
-Plugin->Plugin Manager
+> Plugin->Plugin Manager
 
 In the plugin manager, go to the 'Install New Plugin' tab and click 
 'Choose file ...'. Select the .zip file containing Bridge and restart
 pymol. Now start Bridge by clicking
 
-Plugin->Bridge
+> Plugin->Bridge
