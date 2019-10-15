@@ -8,7 +8,7 @@ The code for this project will be publically available when the article
 Malte Siemers, Michalis Lazaratos, Konstantina Karathanou,
 Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar. 
 Bridge: A graph-based algorithm to analyze dynamic H-bond networks 
-in membrane proteins, Journal of Chemical Theory and Computation, reviewed September 2019.
+in membrane proteins, Journal of Chemical Theory and Computation, under revision October 2019.
 
 is published.
 
@@ -32,16 +32,16 @@ Author: Malte Siemers, Freie Universität Berlin
 If you use this software or anything it produces for work to be published,
 please cite:
    
-Malte Siemers, Michalis Lazaratos, Konstantina Karathanou,
-Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar. 
-Bridge: A graph-based algorithm to analyze dynamic H-bond networks 
+Malte Siemers, Michalis Lazaratos, Konstantina Karathanou, <br/>
+Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar. <br/>
+Bridge: A graph-based algorithm to analyze dynamic H-bond networks <br/>
 in membrane proteins, Journal of Chemical Theory and Computation, under revision October 2019.
 
 and
 
-Federico Guerra, Malte Siemers, Christopher Mielack, and Ana-Nicoleta Bondar
-Dynamics of Long-Distance Hydrogen-Bond Networks in Photosystem II
-The Journal of Physical Chemistry B 2018 122 (17), 4625-4641 
+Federico Guerra, Malte Siemers, Christopher Mielack, and Ana-Nicoleta Bondar<br/>
+Dynamics of Long-Distance Hydrogen-Bond Networks in Photosystem II<br/>
+The Journal of Physical Chemistry B 2018 122 (17), 4625-4641 <br/>
 
 ## Installation Guide
 
