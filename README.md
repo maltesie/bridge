@@ -33,7 +33,7 @@ The Journal of Physical Chemistry B 2018 122 (17), 4625-4641 <br/>
 ## Installation Guide
 
 Bridge comes as a pymol plugin and depends on MDAnalysis (0.19.2+). 
-To install pymol, we recommend using the miniconda python distribution 
+To install pymol, we recommend using the miniconda python distribution for python 3
 (https://docs.conda.io/en/latest/miniconda.html). If miniconda is set up 
 correctly you can install pymol and MDAnalysis with:
 
