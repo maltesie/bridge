@@ -32,11 +32,12 @@ import matplotlib.pyplot as _plt
 class BasicFunctionality(object):
     
     def __init__(self, selection=None, structure=None, trajectories=None, 
-                 start=None, stop=None, step=1, restore_filename=None):
+                 start=None, stop=None, step=1, ions=[], restore_filename=None):
         
         if restore_filename != None: 
             self.load_from_file(restore_filename)
             return
+        
         if selection==None: raise AssertionError('No selection string.')
         if structure==None: raise AssertionError('No structure file path.')
         self._selection = selection
@@ -48,6 +49,15 @@ class BasicFunctionality(object):
         
         self._mda_selection = self._universe.select_atoms(selection)
         if not self._mda_selection:  raise AssertionError('No atoms match the selection')
+        
+        self._ions_list = ions
+        self._ions = _hf.EmptyGroup()
+        self._ions_ids = []
+        self._ions_ids_atomwise = []
+        if ions: 
+            self._ions = self._universe.select_atoms(' or '.join(['name {}'.format(ion) for ion in ions]))
+            self._ions_ids = _hf.MDA_info_list(self._ions, detailed_info=False)
+            self._ions_ids_atomwise = _hf.MDA_info_list(self._ions, detailed_info=True)
         
         self._water = self._universe.select_atoms(_hf.water_definition)
         self._water_ids = _hf.MDA_info_list(self._water, detailed_info=False)
@@ -84,6 +94,13 @@ class BasicFunctionality(object):
     def _set_results(self, result):
         self.initial_results = result
         self.filtered_results = result
+        self._generate_graph_from_current_results()
+        self._generate_filtered_graph_from_filtered_results()
+        
+    def _add_overwrite_results(self, result):
+        for bond in result:
+            self.initial_results[bond] = result[bond]
+        self.filtered_results = self.initial_results
         self._generate_graph_from_current_results()
         self._generate_filtered_graph_from_filtered_results()
         

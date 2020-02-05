@@ -39,15 +39,56 @@ class HbondAnalysis(NetworkAnalysis):
     def __init__(self, selection=None, structure=None, trajectories=None, distance=3.5, cut_angle=60., 
                  start=None, stop=None, step=1, additional_donors=[], 
                  additional_acceptors=[], exclude_donors=[], exclude_acceptors=[], 
-                 special_naming=[], check_angle=True, residuewise=True, add_donors_without_hydrogen=False, restore_filename=None):
+                 ions=[], check_angle=True, residuewise=True, add_donors_without_hydrogen=False, restore_filename=None):
         
         super(HbondAnalysis, self).__init__(selection=selection, structure=structure, trajectories=trajectories, 
              distance=distance, cut_angle=cut_angle, start=start, stop=stop, step=step, 
              additional_donors=additional_donors, additional_acceptors=additional_acceptors,
              exclude_donors=exclude_donors, exclude_acceptors=exclude_acceptors,
-             special_naming=special_naming, check_angle=check_angle, residuewise=residuewise,
+             ions=ions, check_angle=check_angle, residuewise=residuewise,
              add_donors_without_hydrogen=add_donors_without_hydrogen, restore_filename=restore_filename)
+        
+        if restore_filename is not None: return
+        self._i4_distribution = None
     
+    def set_add_ion_interactions(self, include_water=True):
+        if not self._ions: raise AssertionError('No ions were specified during initialization.')
+        frame_count = 0
+        frames = self.nb_frames
+        result = {}
+        if self.residuewise: 
+            ion_ids = self._ions_ids
+            water_ids = self._water_ids
+        else: 
+            ion_ids = self._ions_ids_atomwise
+            water_ids = self._water_ids_atomwise
+        
+        for ts in self._universe.trajectory[self._trajectory_slice]:
+            selection_coordinates = self._da_selection.positions
+            ion_coordinates = self._ions.positions
+            selection_tree = _sp.cKDTree(selection_coordinates)
+            ion_tree = _sp.cKDTree(ion_coordinates)
+            da_ion_pairs = _np.array([[i, j] for i,ions in enumerate(selection_tree.query_ball_tree(ion_tree, self.distance)) for j in ions])
+            frame_res = [self._all_ids[i]+':'+ion_ids[j] for i,j in da_ion_pairs]
+            
+            if include_water:
+                water_coordinates = self._water.positions
+                water_tree = _sp.cKDTree(water_coordinates, leafsize=32)
+                water_ion_pairs = _np.array([[i, j] for i,ions in enumerate(water_tree.query_ball_tree(ion_tree, self.distance)) for j in ions])
+                water_frame_res = [water_ids[i]+':'+ion_ids[j] for i,j in water_ion_pairs]
+                frame_res += water_frame_res
+
+            for bond in frame_res:
+                try:
+                    result[bond][frame_count] = True
+                except:
+                    result[bond] = _np.zeros(frames, dtype=bool)
+                    result[bond][frame_count] = True
+            
+            frame_count+=1
+            
+        if not self.initial_results: self._set_results(result)
+        else: self._add_overwrite_results(result)
     
     def set_hbonds_in_selection(self, exclude_backbone_backbone=True):
         if exclude_backbone_backbone: backbone_filter = _np.array([(ids.split('-')[3] in ['O', 'N']) for ids in self._all_ids_atomwise])
@@ -88,7 +129,7 @@ class HbondAnalysis(NetworkAnalysis):
                     result[bond][frame_count] = True
             frame_count+=1
         self._set_results(result)
-
+        if self._ions_list: self.set_add_ion_interactions(False)
 
     def set_hbonds_only_water_in_convex_hull(self):
         result = {}
@@ -128,7 +169,7 @@ class HbondAnalysis(NetworkAnalysis):
                     result[bond] = _np.zeros(frames, dtype=bool)
                     result[bond][frame_count] = True
             frame_count+=1
-        self._set_results(result)    
+        self._set_results(result)  
     
     def set_hbonds_in_selection_and_water_in_convex_hull(self, exclude_backbone_backbone=True):
         if exclude_backbone_backbone: backbone_filter = _np.array([(ids.split('-')[3] in ['O', 'N']) for ids in self._all_ids_atomwise])        
@@ -182,6 +223,7 @@ class HbondAnalysis(NetworkAnalysis):
                     result[bond][frame_count] = True
             frame_count+=1
         self._set_results(result)
+        if self._ions_list: self.set_add_ion_interactions(True)
     
     
     def set_hbonds_in_selection_and_water_around(self, around_radius, exclude_backbone_backbone=True):
@@ -241,6 +283,7 @@ class HbondAnalysis(NetworkAnalysis):
                     result[bond][frame_count] = True
             frame_count+=1
         self._set_results(result)
+        if self._ions_list: self.set_add_ion_interactions(True)
 
     def filter_only_backbone_bonds(self, use_filtered=True):
         assert self.residuewise == False, 'residuewise has to be False for this filter to work.'
@@ -411,6 +454,33 @@ class HbondAnalysis(NetworkAnalysis):
             return output
         return class_dict, res3
     
+    def compute_i4_motif_distribution(self):
+        class_dict, res3 = self.compute_i4_bonds(print_table=False)
+        z = {i:[] for i in range(1,4)}
+        for key in class_dict:
+            segida, resna, resida, atoma = key.split(':')[0].split('-')
+            segidb, resnb, residb, atomb = key.split(':')[1].split('-')
+            atoms = self._mda_selection.select_atoms("(segid {} and resid {} and name {}) or (segid {} and resid {} and name {})".format(segida, resida, atoma, segidb, residb, atomb))
+            z[class_dict[key]]+=[atom for atom in atoms]
+        for key in res3:
+            for i in range(2):
+                segida, resna, resida, atoma = key.split(':')[0].split('-')
+                segidb, resnb, residb, atomb = key.split(':')[1].split('-')
+                atoms = self._mda_selection.select_atoms("(segid {} and resid {} and name {}) or (segid {} and resid {} and name {})".format(segida, resida, atoma, segidb, residb, atomb))
+                z[3]+=[atom for atom in atoms]
+                if i==0: key = res3[key]
+        for key in z:
+            if isinstance(z[key], list) and z[key] != []: 
+                z[key] = _MDAnalysis.core.AtomGroup.AtomGroup(z[key])
+        z_plot = {i:[] for i in range(1,4)}
+        for ts in self._universe.trajectory[self._trajectory_slice]:
+            for key in z:
+                if not isinstance(z[key], list): 
+                    if key==3: z_plot[key].append(z[key].positions[:,2].reshape(-1,4).mean(1))
+                    else: z_plot[key].append(z[key].positions[:,2].reshape(-1,2).mean(1))
+        z_plot = [_np.array(z_plot[key]).mean(0) if z_plot[key] != [] else _np.array(z_plot[key]) for key in z_plot]
+        self._i4_distribution = z_plot
+        return z_plot
     
     def draw_i4_motif_distribution(self, filename=None, return_figure=False):
         class_dict, res3 = self.compute_i4_bonds(print_table=False)

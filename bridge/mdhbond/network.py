@@ -38,10 +38,10 @@ class NetworkAnalysis(BasicFunctionality):
     def __init__(self, selection=None, structure=None, trajectories=None, distance=3.5, cut_angle=60., 
                  start=None, stop=None, step=1, additional_donors=[], 
                  additional_acceptors=[], exclude_donors=[], exclude_acceptors=[], 
-                 special_naming=[], check_angle=True, residuewise=True, add_donors_without_hydrogen=False, restore_filename=None):
+                 ions=[], check_angle=True, residuewise=True, add_donors_without_hydrogen=False, restore_filename=None):
         
         super(NetworkAnalysis, self).__init__(selection=selection, structure=structure, trajectories=trajectories, 
-             start=start, stop=stop, step=step, restore_filename=restore_filename)
+             start=start, stop=stop, step=step, ions=ions, restore_filename=restore_filename)
         if restore_filename != None: return
         self.donor_names = _hf.donor_names_global.union(additional_donors)-set(exclude_donors)
         self.acceptor_names = _hf.acceptor_names_global.union(additional_acceptors)-set(exclude_acceptors)
@@ -60,8 +60,8 @@ class NetworkAnalysis(BasicFunctionality):
         if sorted_selection.acceptors: self._acceptors = _MDAnalysis.core.groups.AtomGroup(sorted_selection.acceptors)
         else: self._acceptors = _hf.EmptyGroup()
         self._nb_acceptors = len(self._acceptors)
-        da_ids = _hf.MDA_info_list(da_selection, detailed_info=not residuewise, special_naming=special_naming)
-        da_ids_atomwise = _hf.MDA_info_list(da_selection, detailed_info=True, special_naming=special_naming)
+        da_ids = _hf.MDA_info_list(da_selection, detailed_info=not residuewise)
+        da_ids_atomwise = _hf.MDA_info_list(da_selection, detailed_info=True)
         self._first_water_id = len(da_selection)
         self._first_water_hydrogen_id = len(sorted_selection.hydrogens)
         if not add_donors_without_hydrogen:
@@ -371,7 +371,36 @@ class NetworkAnalysis(BasicFunctionality):
         self.joint_occupancy_series = combined_occupancy
         self.joint_occupancy_frames = _np.nonzero(combined_occupancy)[0]
         return combined_occupancy.mean()
-     
+    
+    def compute_centrality(self, centrality_type='betweenness', normalize=True, weight=None, filename=None, use_filtered=True):
+        if use_filtered: graph = self.filtered_graph
+        else: graph = self.initial_graph
+        centralities = {node:_np.zeros(self.nb_frames) for node in graph.nodes()}
+        for i in range(self.nb_frames):
+            g_i = self._compute_graph_in_frame(i, use_filtered=use_filtered)
+            if centrality_type == 'betweenness': centrality_i = _nx.betweenness_centrality(g_i, normalized=normalize)
+            elif centrality_type == 'degree': centrality_i = _nx.degree_centrality(g_i)
+            else: raise AssertionError("centrality_type has to be 'betweenness' or 'degree'")
+            for node in centrality_i: 
+                if (centrality_type == 'degree') and not normalize: centralities[node][i] = centrality_i[node] * (g_i.number_of_nodes()-1)
+                else: centralities[node][i] = centrality_i[node]
+        if weight is None: 
+            for node in centralities: centralities[node] = _np.round(centralities[node].mean(),2)
+        else:
+            ma = max(centralities.values())
+            for node in centralities: centralities[node] = _np.round((centralities[node].mean()/ma)/weight,2)
+        if filename is not None:
+            string = centrality_type + ' centrality values:\n\n'
+            mc = max(centralities.values())
+            for c in centralities:
+                string += c + ' ' + str(centralities[c]) + '\n'
+            string += '\nnormalized to [0,1]:\n'
+            for c in centralities:
+                string += c + ' ' + str(_np.round(centralities[c]/mc, 2)) + '\n'
+            with open(filename, 'w') as f:
+                f.write(string)
+        return centralities
+            
     def draw_multi_segment_connection_timeseries(self, segnames=None, colors=None, use_filtered=True, filename=None, return_figure=False):
         if use_filtered: results = self.filtered_results
         else: results = self.initial_results
@@ -545,10 +574,10 @@ class NetworkAnalysis(BasicFunctionality):
             else: results_per_residue_compare = {segname:_odict({i:0 for i in residues_compare}) for segname in segnames_compare}
         for key in results:
             segna, resna, resida, segnb, resnb, residb = _hf.deconst_key(key, self.residuewise)
-            if resna not in ['TIP3', 'HOH']: 
+            if resna not in ['TIP3', 'HOH']+self._ions_list: 
                 if average: results_per_residue[segna][resida] += results[key]
                 else: results_per_residue[segna][resida] +=1
-            if resnb not in ['TIP3', 'HOH']: 
+            if resnb not in ['TIP3', 'HOH']+self._ions_list: 
                 if average: results_per_residue[segnb][residb] += results[key]
                 else: results_per_residue[segnb][residb] +=1
         if average: 
@@ -558,10 +587,10 @@ class NetworkAnalysis(BasicFunctionality):
         if compare_to != None:
             for key in results_compare:
                 segna, resna, resida, segnb, resnb, residb = _hf.deconst_key(key, compare_to.residuewise)
-                if resna not in ['TIP3', 'HOH']: 
+                if resna not in ['TIP3', 'HOH']+self._ions_list: 
                     if average: results_per_residue_compare[segna][resida] += results_compare[key] 
                     else: results_per_residue_compare[segna][resida] +=1
-                if resnb not in ['TIP3', 'HOH']: 
+                if resnb not in ['TIP3', 'HOH']+self._ions_list: 
                     if average: results_per_residue_compare[segnb][residb] += results_compare[key]
                     else: results_per_residue_compare[segnb][residb] +=1
             if average: 
@@ -634,7 +663,7 @@ class NetworkAnalysis(BasicFunctionality):
                     _plt.legend()
                     
         all_xs = _np.unique([xs[key] for key in xs])
-        all_labels = [_hf.aa_three2one[resnames[resi]]+str(resi+self.add_missing_residues) for resi in all_xs]
+        all_labels = [_hf.aa_three2one[resnames[resi]]+str(resi+self.add_missing_residues) if resnames[resi] in _hf.aa_three2one else resnames[resi]+str(resi+self.add_missing_residues) for resi in all_xs]
         return_string = 'labels ' + ' '.join(all_labels) + '\n'
         for segn in xs: return_string += segn + ' ' + ' '.join(_np.array(ys[segn], dtype=_np.str)) + '\n'
         if compare_to != None: 
@@ -934,8 +963,8 @@ class NetworkAnalysis(BasicFunctionality):
             return fig, result_string
         self._save_or_draw(filename, return_figure=return_figure)
     
-    def draw_graph(self, draw_edge_occupancy=True, compare_to=None, highlight_interregion=False, in_frame=None, default_color='seagreen', node_factor=1.0, draw_labels=True, color_dict={}, filename=None, return_figure=False, draw_base=False, use_filtered=True):
-        if compare_to != None: 
+    def draw_graph(self, draw_edge_occupancy=True, compare_to=None, mutations=None, highlight_interregion=False, in_frame=None, centrality=None, max_centrality=None, default_color='seagreen', node_factor=1.0, draw_labels=True, color_dict={}, filename=None, return_figure=False, draw_base=False, use_filtered=True):
+        if compare_to is not None: 
             if use_filtered: 
                 graph1 = self.filtered_graph
                 graph2 = compare_to.filtered_graph
@@ -946,6 +975,12 @@ class NetworkAnalysis(BasicFunctionality):
                 graph2 = compare_to.initial_graph
                 results = self.initial_results
                 compare_results = compare_to.initial_results
+            if mutations is not None:
+                for mutation in mutations:
+                    old_node, new_node = mutation.split('_')
+                    temp_edges = [(new_node, connected_node) for connected_node in graph1[old_node]]
+                    graph1.remove_node(old_node)
+                    graph1.add_edges_from(temp_edges)
             composed_graph = _nx.compose(graph1, graph2)
             e_new, e_gone = [], []
             for a,b in graph1.edges():
@@ -972,16 +1007,23 @@ class NetworkAnalysis(BasicFunctionality):
             pos.append(_np.mean(atoms.positions, axis=0))
             nodes.append(node)
         """
-        if in_frame == None: 
+        if in_frame is None: 
             self.compute_joint_occupancy()
             if self.joint_occupancy_frames.size > 0: in_frame = self.joint_occupancy_frames[0]
             else: in_frame=0
         self._universe.trajectory[in_frame]
-        all_coordinates = _np.vstack((self._da_selection.positions, self._water.positions))
+        all_coordinates = _np.vstack((self._da_selection.positions, self._water.positions, _np.array(self._ions.positions).reshape((-1,3))))
         nodes = _np.array(composed_graph.nodes())
-        if self.residuewise: all_id = _np.array(self._all_ids)
-        else: all_id = _np.array(self._all_ids_atomwise)
+        if self.residuewise: all_id = _np.array(self._all_ids+self._ions_ids)
+        else: all_id = _np.array(self._all_ids_atomwise+self._ions_ids_atomwise)
+        old_nodes, new_nodes = [], []
+        if (mutations is not None) and (compare_to is not None):
+            for mutation in mutations:
+                old_node, new_node = mutation.split('_')
+                old_nodes.append(old_node)
+                new_nodes.append(new_node)
         for node in nodes:
+            if node in new_nodes: node = old_nodes[new_nodes.index(node)]
             pos.append(all_coordinates[all_id == node].mean(0))
         pos = _np.array(pos)
         pos2d, base = _hf.pca_2d_projection(pos)
@@ -1042,9 +1084,18 @@ class NetworkAnalysis(BasicFunctionality):
             except KeyError: color = default_color
             color_graph[color].add_node(node)
         #node_size=node_factor*_np.sqrt(_np.sqrt(_np.sqrt(len(pos))))*600,
-        
-        for color in color_graph:
-            _nx.draw_networkx_nodes(color_graph[color], pos, node_size=900, alpha=0.5, node_color=color)
+        if centrality is not None:
+            color_value_list = [centrality[node] if node in centrality else 0 for node in composed_graph.nodes()]            
+            if max_centrality is not None: mc = max_centrality
+            else: mc = max(color_value_list)
+            cmap = _plt.get_cmap('jet')
+            _nx.draw_networkx_nodes(composed_graph, pos, node_size=900, alpha=0.5, node_color=color_value_list, cmap=cmap, vmin=0.0, vmax=mc)
+            sm = _plt.cm.ScalarMappable(cmap=cmap)
+            sm.set_array([0.0, mc])
+            _plt.colorbar(sm, ax=_plt.axes())
+        else:
+            for color in color_graph:
+                _nx.draw_networkx_nodes(color_graph[color], pos, node_size=900, alpha=0.5, node_color=color)
         #f = _np.sqrt(_np.sqrt(_np.sqrt(_np.sqrt(len(pos)))))*0.5*(1 - 0.5 * (1 - node_factor))
         f=0.6
         len2fontsize = _hf.defaultdict(lambda: 6*f, {2:18*f, 3:18*f, 4:16*f, 5:13*f, 6:11*f, 7:10*f, 8:9*f, 9:8*f, 10:7*f})

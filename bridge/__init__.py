@@ -238,9 +238,10 @@ def run_plugin_gui():
         paths = hba.applied_filters['shortest_paths']
         comp = hba.applied_filters['connected_component']
         segm = hba.applied_filters['segnames']
+        resn = hba.applied_filters['resnames']
         hyd = hba.applied_filters['shells']
         back = hba.applied_filters['backbone']
-        return exp, occ, comp, paths, segm, hyd, back
+        return exp, occ, comp, paths, segm, resn, hyd, back
     
     def get_applied_filter_wa():
         exp = wa.applied_filters['single_path']
@@ -248,8 +249,9 @@ def run_plugin_gui():
         paths = wa.applied_filters['shortest_paths']
         comp = wa.applied_filters['connected_component']
         segm = wa.applied_filters['segnames']
+        resn = wa.applied_filters['resnames']
         avg_least = wa.applied_filters['avg_least_bonds']
-        return exp, occ, comp, paths, segm, avg_least
+        return exp, occ, comp, paths, segm, resn, avg_least
     
     def browse_filename_structure():
         filename = getOpenFileNameWithExt(
@@ -269,8 +271,9 @@ def run_plugin_gui():
         global hba
         form.button_bonds_init.setText('Working...')
         form.button_bonds_init.repaint()
-        ad = [donor for donor in form.line_bonds_donors.text().replace(' ','').split(',')]
-        aa = [acceptor for acceptor in form.line_bonds_acceptors.text().replace(' ','').split(',')]
+        ad = [donor for donor in form.line_bonds_donors.text().replace(' ','').split(',') if donor != '']
+        aa = [acceptor for acceptor in form.line_bonds_acceptors.text().replace(' ','').split(',') if acceptor != '']
+        ions = [ion for ion in form.line_bonds_ions.text().replace(' ','').split(',') if ion != '']
         form.group_bonds_filter.setEnabled(False)
         form.group_bonds_filter.repaint()
         #form.group_bonds_compute.setEnabled(True)
@@ -307,7 +310,7 @@ def run_plugin_gui():
             try:
                 hba = HbondAnalysis(selection=form.line_bonds_selection.text(), structure=form.line_bonds_structure.text(),
                                 trajectories=trajectory, check_angle=check_angle, residuewise=form.checkbox_bonds_residuewise.isChecked(), 
-                                additional_donors=ad, additional_acceptors=aa, add_donors_without_hydrogen=donors_without)
+                                additional_donors=ad, additional_acceptors=aa, ions=ions, add_donors_without_hydrogen=donors_without)
                 try: hba.add_missing_residues = int(form.line_bonds_missing_residues.text())
                 except: error('Missing residues number not set. Cant convert input to integer.')
             except AssertionError:
@@ -405,6 +408,8 @@ def run_plugin_gui():
         form.line_bonds_path_goal.setText('')
         form.line_bonds_filter_sega.setText('')
         form.line_bonds_filter_segb.setText('')
+        form.line_bonds_filter_resa.setText('')
+        form.line_bonds_filter_resb.setText('')
         form.line_bonds_order.setText('')
         form.checkBox_bonds_backbone.setChecked(False)
         filter_bonds()
@@ -419,7 +424,6 @@ def run_plugin_gui():
         form.repaint()
     
     def filter_bonds():
-        import numpy as np
         occupancy_cut = form.line_bonds_occupancy.text()
         connected_root = form.line_bonds_connected_root.text()
         path_root = form.line_bonds_path_root.text()
@@ -427,12 +431,14 @@ def run_plugin_gui():
         path_explicit = form.textedit_bonds_path.toPlainText()
         sega = form.line_bonds_filter_sega.text()
         segb = form.line_bonds_filter_segb.text()
+        resa = form.line_bonds_filter_resa.text()
+        resb = form.line_bonds_filter_resb.text()
         backbone = form.checkBox_bonds_backbone.isChecked()
         form.textedit_bonds_active_filters.clear()
         use_filtered = False
         try:
-            order = np.unique([int(a) if a!='' else [] for a in form.line_bonds_order.text().replace(' ','').split(',')])
-            if order.size == 0: order=[6,3,1,2,4,5] 
+            order = [int(a) for a in form.line_bonds_order.text().replace(' ','').split(',') if a!='']
+            if len(order) == 0: order=[6,3,1,2,4,5] 
         except:
             error('order must be integers separated by commas')
             return
@@ -463,13 +469,20 @@ def run_plugin_gui():
                     form.textedit_bonds_active_filters.append('Paths from '+path_root+' to '+path_goal)
                     use_filtered = True
                 except: error('root and/or target are not in the graph!')
-            if sega != '' and a==5:
+            if (sega != '' or resa != '') and a==5:
                 try:
-                    if segb == '': segb=None
-                    hba.filter_between_segnames(sega, segb, use_filtered)
-                    if segb is not None: form.textedit_bonds_active_filters.append('Between '+sega+' and '+segb)
-                    else: form.textedit_bonds_active_filters.append('Within '+sega)
-                    use_filtered = True
+                    if sega != '':
+                        if segb == '': segb=None
+                        hba.filter_between_segnames(sega, segb, use_filtered)
+                        if segb is not None: form.textedit_bonds_active_filters.append('Between segments '+sega+' and '+segb)
+                        else: form.textedit_bonds_active_filters.append('Between segment '+sega+' and all')
+                        use_filtered = True
+                    if resa != '':
+                        if resb == '': resb=None
+                        hba.filter_between_resnames(resa, resb, use_filtered)
+                        if resb is not None: form.textedit_bonds_active_filters.append('Between resnames '+resa+' and '+resb)
+                        else: form.textedit_bonds_active_filters.append('Between resname '+resa+' and all')
+                        use_filtered = True
                 except:
                     pass
             if backbone and a==6:
@@ -867,6 +880,7 @@ def run_plugin_gui():
         form.line_bonds_structure.setText(hba._structure)
         if hba._trajectories is not None: form.line_bonds_trajectories.setText(', '.join(hba._trajectories))
         else: form.line_bonds_trajectories.setText('')
+        if hba._ions_list: form.line_bonds_ions.setText(', '.join(hba._ions_list))
         form.line_bonds_selection.setText(hba._selection)
         form.line_bonds_dist.setText(str(hba.distance))
         form.line_bonds_angle.setText(str(hba.cut_angle))
@@ -888,7 +902,7 @@ def run_plugin_gui():
         form.checkBox_bonds_donors_without_hydrogen.setChecked(hba._add_donors_without_hydrogen)
         form.checkBox_angle.setChecked(hba.check_angle)
         form.checkBox_bonds_exclude_backbone.setChecked(hba._exclude_backbone_backbone)
-        exp, occ, comp, paths, segm, hyd, back = get_applied_filter_hba()
+        exp, occ, comp, paths, segm, resn, hyd, back = get_applied_filter_hba()
         form.textedit_bonds_active_filters.clear()
         
         if exp is not None: 
@@ -905,9 +919,21 @@ def run_plugin_gui():
             form.line_bonds_path_root.setText(paths[0])
             form.line_bonds_path_goal.setText(paths[1])
         if segm is not None: 
-            form.textedit_bonds_active_filters.append('Between '+segm[0]+' and '+str(segm[1]))
-            form.line_bonds_filter_sega.setText(segm[0])
-            form.line_bonds_filter_segb.setText(segm[1])
+            if segm[1] is not None:
+                form.textedit_bonds_active_filters.append('Between segments '+segm[0]+' and '+str(segm[1]))
+                form.line_bonds_filter_sega.setText(segm[0])
+                form.line_bonds_filter_segb.setText(segm[1])
+            else:
+                form.textedit_bonds_active_filters.append('Between segment '+segm[0]+' and all')
+                form.line_bonds_filter_sega.setText(segm[0])
+        if resn is not None: 
+            if resn[1] is not None:
+                form.textedit_bonds_active_filters.append('Between resnames '+resn[0]+' and '+str(resn[1]))
+                form.line_bonds_filter_resa.setText(resn[0])
+                form.line_bonds_filter_resb.setText(resn[1])
+            else:
+                form.textedit_bonds_active_filters.append('Between resname '+resn[0]+' and all')
+                form.line_bonds_filter_resa.setText(resn[0])
         if hyd is not None: form.textedit_bonds_active_filters.append('Water in '+str(hyd)+' shells')
         if back is not None: 
             form.textedit_bonds_active_filters.append('Only backbone-backbone H Bonds')
@@ -1072,6 +1098,8 @@ def run_plugin_gui():
         form.line_bonds_path_goal_2.setText('')
         form.line_bonds_filter_sega_2.setText('')
         form.line_bonds_filter_segb_2.setText('')
+        form.line_bonds_filter_resa_2.setText('')
+        form.line_bonds_filter_resb_2.setText('')
         form.line_wires_order.setText('')
         filter_wires()
         form.repaint()
@@ -1092,11 +1120,13 @@ def run_plugin_gui():
         path_explicit = form.textedit_bonds_path_2.toPlainText()
         sega = form.line_bonds_filter_sega_2.text()
         segb = form.line_bonds_filter_segb_2.text()
+        resa = form.line_bonds_filter_resa_2.text()
+        resb = form.line_bonds_filter_resb_2.text()
         form.textedit_bonds_active_filters_2.clear()
         use_filtered = False
         try:
-            order = np.unique([int(a) if a!='' else [] for a in form.line_wires_order.text().replace(' ','').split(',')])
-            if order.size == 0: order=[3,1,2,4,5] 
+            order = [int(a) for a in form.line_wires_order.text().replace(' ','').split(',') if a!='']
+            if len(order) == 0: order=[3,1,2,4,5] 
         except:
             error('order must be integers separated by commas')
             return
@@ -1132,15 +1162,23 @@ def run_plugin_gui():
                         form.textedit_bonds_active_filters_2.append('Minimal bonds paths from '+path_root+' to '+path_goal)
                         use_filtered = True
                 except: error('root and/or target are not in the graph!')
-            if sega != '' and a==5:
+            if (sega != '' or resa != '') and a==5:
                 try:
-                    if segb == '': segb=None
-                    wa.filter_between_segnames(sega, segb, use_filtered)
-                    if segb is not None: form.textedit_bonds_active_filters_2.append('Between '+sega+' and '+segb)
-                    else: form.textedit_bonds_active_filters.append('Within '+sega)
-                    use_filtered = True
+                    if sega != '':
+                        if segb == '': segb=None
+                        wa.filter_between_segnames(sega, segb, use_filtered)
+                        if segb is not None: form.textedit_bonds_active_filters_2.append('Between segments '+sega+' and '+segb)
+                        else: form.textedit_bonds_active_filters_2.append('Between segment '+sega+' and all')
+                        use_filtered = True
+                    if resa != '':
+                        if resb == '': resb=None
+                        wa.filter_between_resnames(resa, resb, use_filtered)
+                        if resb is not None: form.textedit_bonds_active_filters_2.append('Between resnames '+resa+' and '+resb)
+                        else: form.textedit_bonds_active_filters_2.append('Between resname '+resa+' and all')
+                        use_filtered = True
                 except:
                     pass
+                
         if len(wa.filtered_results) == 0:
             error('This combination of filters leads to an empty set of results!')
             use_filtered = False
@@ -1544,7 +1582,7 @@ def run_plugin_gui():
         form.checkBox_wires_donors_without_hydrogen.setChecked(wa._add_donors_without_hydrogen)
         form.checkBox_wires_angle.setChecked(wa.check_angle)
         form.checkBox_wires_allow_direct_bonds.setChecked(wa._allow_direct_bonds)
-        exp, occ, comp, paths, segm, avg_least = get_applied_filter_wa()
+        exp, occ, comp, paths, segm, resn, avg_least = get_applied_filter_wa()
         form.textedit_bonds_active_filters_2.clear()
         form.line_wire_missing_residues.setText(str(wa.add_missing_residues))
         if exp is not None: 
@@ -1565,10 +1603,21 @@ def run_plugin_gui():
             form.line_bonds_path_root_2.setText(avg_least[0])
             form.line_bonds_path_goal_2.setText(avg_least[1])
         if segm is not None: 
-            form.textedit_bonds_active_filters_2.append('Between '+segm[0]+' and '+str(segm[1]))
-            form.line_bonds_filter_sega_2.setText(segm[0])
-            form.line_bonds_filter_segb_2.setText(segm[1])
-        
+            if segm[1] is not None:
+                form.textedit_bonds_active_filters_2.append('Between segments '+segm[0]+' and '+str(segm[1]))
+                form.line_bonds_filter_sega_2.setText(segm[0])
+                form.line_bonds_filter_segb_2.setText(segm[1])
+            else:
+                form.textedit_bonds_active_filters_2.append('Between segment '+segm[0]+' and all')
+                form.line_bonds_filter_sega_2.setText(segm[0])
+        if resn is not None: 
+            if resn[1] is not None:
+                form.textedit_bonds_active_filters_2.append('Between resnames '+resn[0]+' and '+str(resn[1]))
+                form.line_bonds_filter_resa_2.setText(resn[0])
+                form.line_bonds_filter_resb_2.setText(resn[1])
+            else:
+                form.textedit_bonds_active_filters_2.append('Between resname '+resn[0]+' and all')
+                form.line_bonds_filter_resa_2.setText(resn[0])
         
         
     form_plotting.button_wire_draw_water_in_wire.clicked.connect(draw_wire_water_in_wire)

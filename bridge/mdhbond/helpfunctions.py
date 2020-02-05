@@ -54,7 +54,7 @@ class Selection:
 
         if mda_residue:
             for atom in mda_residue.atoms:
-                if atom.name in donor_names:
+                if (atom.name in donor_names)  or ((len(atom.name) > 1) and atom.name[0] in ['N', 'O']):
                     if add_donors_without_hydrogen:
                         self.donors.append(atom)
                         self.donor_info.append(
@@ -71,7 +71,7 @@ class Selection:
                             self.donors.append(atom)
                             self.donor_info.append(
                                 str(atom.segid) + '-' + atom.resname + '-' + str(atom.resid) + '-' + atom.name)
-                if atom.name in acceptor_names:
+                if (atom.name in acceptor_names) or ((len(atom.name) > 1) and atom.name[0] in ['N', 'O']):
                     self.acceptors.append(atom)
                     self.acceptor_info.append(
                         str(atom.segid) + '-' + atom.resname + '-' + str(atom.resid) + '-' + atom.name)
@@ -224,9 +224,12 @@ def pca_2d_projection(pos3d):
     m = pos3d.mean(axis=0)
     pos3dm = pos3d - m
     S = pos3dm.T.dot(pos3dm)
-    eig_val, eig_vec = np.linalg.eigh(S)
-    eig_val, eig_vec = eig_val[::-1][:2], eig_vec.T[::-1][:2]
-    return eig_vec.dot(pos3dm.T).T, eig_vec
+    try:
+        eig_val, eig_vec = np.linalg.eigh(S)
+        eig_val, eig_vec = eig_val[::-1][:2], eig_vec.T[::-1][:2]
+        return eig_vec.dot(pos3dm.T).T, eig_vec
+    except:
+        return np.array([1.0,1.0]), np.array([[1.0,0,0],[0,1.0,0]])
 
 
 def predecessor_recursive(d,pred,start,stop):

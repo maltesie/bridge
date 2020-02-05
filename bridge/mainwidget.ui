@@ -31,7 +31,7 @@
         <x>0</x>
         <y>0</y>
         <width>962</width>
-        <height>919</height>
+        <height>942</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -212,30 +212,20 @@
               <string>Initialize</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_2">
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_8">
-                <property name="text">
-                 <string>static selection</string>
+              <item row="3" column="2">
+               <widget class="QLineEdit" name="line_bonds_acceptors">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Define additional acceptor atom names. The default acceptor atom names are OH2, OW, OD1, OD2, SG, OE1, OE2, ND1, NE2, SD, OG, OG1, OH.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                <property name="placeholderText">
+                 <string>e.g. O</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="17">
-               <widget class="QPushButton" name="button_bonds_structure">
+              <item row="1" column="17">
+               <widget class="QPushButton" name="button_bonds_trajectories">
                 <property name="text">
                  <string notr="true">Browse...</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QLabel" name="label_10">
-                <property name="text">
-                 <string>add acceptors</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -249,6 +239,30 @@
                 </property>
                </widget>
               </item>
+              <item row="5" column="17">
+               <widget class="QPushButton" name="button_bonds_init">
+                <property name="text">
+                 <string>Initialize</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="3">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>add donors</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="17">
+               <widget class="QPushButton" name="button_bonds_structure">
+                <property name="text">
+                 <string notr="true">Browse...</string>
+                </property>
+               </widget>
+              </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_2">
                 <property name="text">
@@ -259,34 +273,20 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="17">
-               <widget class="QPushButton" name="button_bonds_trajectories">
+              <item row="3" column="1">
+               <widget class="QLabel" name="label_10">
                 <property name="text">
-                 <string notr="true">Browse...</string>
+                 <string>add acceptors</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
-              <item row="4" column="17">
-               <widget class="QPushButton" name="button_bonds_init">
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_8">
                 <property name="text">
-                 <string>Initialize</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="2">
-               <widget class="QLineEdit" name="line_bonds_acceptors">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Define additional acceptor atom names. The default acceptor atom names are OH2, OW, OD1, OD2, SG, OE1, OE2, ND1, NE2, SD, OG, OG1, OH.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="placeholderText">
-                 <string>e.g. O</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="3">
-               <widget class="QLabel" name="label_9">
-                <property name="text">
-                 <string>add donors</string>
+                 <string>static selection</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -303,40 +303,21 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="1" colspan="4">
-               <widget class="QLineEdit" name="line_bonds_selection">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Provide a static selection. It will not be updated and cant contain timedependent parts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
+              <item row="3" column="5">
+               <widget class="QLabel" name="label_23">
                 <property name="text">
-                 <string/>
+                 <string>ions</string>
                 </property>
+               </widget>
+              </item>
+              <item row="3" column="6">
+               <widget class="QLineEdit" name="line_bonds_ions">
                 <property name="placeholderText">
-                 <string>e.g. protein</string>
+                 <string>e.g. CLA</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="1" colspan="4">
-               <widget class="QLineEdit" name="line_bonds_trajectories">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;One or more trajectory files (.dcd or other) can be provided opionally.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1" colspan="4">
-               <widget class="QLineEdit" name="line_bonds_structure">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;A structure file (.psf or .pdb or other) has to be provided.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1" colspan="4">
+              <item row="5" column="1" colspan="6">
                <layout class="QHBoxLayout" name="horizontalLayout_17">
                 <item>
                  <widget class="QLabel" name="label_14">
@@ -424,6 +405,39 @@
                  </widget>
                 </item>
                </layout>
+              </item>
+              <item row="2" column="1" colspan="6">
+               <widget class="QLineEdit" name="line_bonds_selection">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Provide a static selection. It will not be updated and cant contain timedependent parts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="placeholderText">
+                 <string>e.g. protein</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1" colspan="6">
+               <widget class="QLineEdit" name="line_bonds_trajectories">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;One or more trajectory files (.dcd or other) can be provided opionally.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" colspan="6">
+               <widget class="QLineEdit" name="line_bonds_structure">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;A structure file (.psf or .pdb or other) has to be provided.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -887,76 +901,6 @@
                 </layout>
                </widget>
               </item>
-              <item row="5" column="0">
-               <widget class="QGroupBox" name="groupBox_3">
-                <property name="title">
-                 <string>5 Between Segments or Molecules</string>
-                </property>
-                <layout class="QHBoxLayout" name="horizontalLayout_13">
-                 <item>
-                  <widget class="QLabel" name="label">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>segment 1</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="line_bonds_filter_sega">
-                   <property name="maximumSize">
-                    <size>
-                     <width>60</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Filter for H bonds between two segments or molecules. Leave the field for segment 2 blank to filter for bonds between segment 1 and everything else.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_20">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="layoutDirection">
-                    <enum>Qt::LeftToRight</enum>
-                   </property>
-                   <property name="text">
-                    <string>segment 2</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="line_bonds_filter_segb">
-                   <property name="maximumSize">
-                    <size>
-                     <width>60</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Filter for H bonds between two segments or molecules. Leave the field for segment 2 blank to filter for bonds between segment 1 and everything else.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
               <item row="0" column="0">
                <widget class="QGroupBox" name="groupBox_10">
                 <property name="title">
@@ -1047,31 +991,6 @@
                 </layout>
                </widget>
               </item>
-              <item row="1" column="0" rowspan="4">
-               <widget class="QGroupBox" name="groupBox">
-                <property name="title">
-                 <string>3 Specific Path</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_13">
-                 <item row="0" column="0">
-                  <widget class="QTextEdit" name="textedit_bonds_path">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Set the graph to a specific path of nodes. The nodes in the path must be provided in the correct order.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="placeholderText">
-                    <string>e.g. SEG-GLU-1[-OE1], SEG-ASP-2[-OD1], SEG-THR-3[-OG1]</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
               <item row="3" column="1" rowspan="2" colspan="2">
                <widget class="QGroupBox" name="groupBox_filter_backbone">
                 <property name="title">
@@ -1126,6 +1045,141 @@
                    </property>
                    <property name="placeholderText">
                     <string>e.g. 6, 3, 1, 2, 4, 5 (default)</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="1" column="0" rowspan="3">
+               <widget class="QGroupBox" name="groupBox">
+                <property name="title">
+                 <string>3 Specific Path</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_13">
+                 <item row="0" column="0">
+                  <widget class="QTextEdit" name="textedit_bonds_path">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Set the graph to a specific path of nodes. The nodes in the path must be provided in the correct order.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="placeholderText">
+                    <string>e.g. SEG-GLU-1[-OE1], SEG-ASP-2[-OD1], SEG-THR-3[-OG1]</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="4" column="0" rowspan="2">
+               <widget class="QGroupBox" name="groupBox_3">
+                <property name="title">
+                 <string>5 Between Segments or Molecules</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_7">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>segment 1</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QLabel" name="label_20">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="layoutDirection">
+                    <enum>Qt::LeftToRight</enum>
+                   </property>
+                   <property name="text">
+                    <string>segment 2</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="line_bonds_filter_sega">
+                   <property name="maximumSize">
+                    <size>
+                     <width>60</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Filter for H bonds between two segments or molecules. Leave the field for segment 2 blank to filter for bonds between segment 1 and everything else.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="3">
+                  <widget class="QLineEdit" name="line_bonds_filter_segb">
+                   <property name="maximumSize">
+                    <size>
+                     <width>60</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Filter for H bonds between two segments or molecules. Leave the field for segment 2 blank to filter for bonds between segment 1 and everything else.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_24">
+                   <property name="text">
+                    <string>resname 1</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="line_bonds_filter_resa">
+                   <property name="maximumSize">
+                    <size>
+                     <width>60</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QLabel" name="label_25">
+                   <property name="text">
+                    <string>resname 2</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="3">
+                  <widget class="QLineEdit" name="line_bonds_filter_resb">
+                   <property name="maximumSize">
+                    <size>
+                     <width>60</width>
+                     <height>16777215</height>
+                    </size>
                    </property>
                   </widget>
                  </item>
@@ -1837,25 +1891,6 @@
               <string>Filter</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_19">
-              <item row="1" column="0" rowspan="3">
-               <widget class="QGroupBox" name="groupBox_2">
-                <property name="title">
-                 <string>3 Specific Path</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_25">
-                 <item row="0" column="0">
-                  <widget class="QTextEdit" name="textedit_bonds_path_2">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Set the graph to a specific path of nodes. The nodes in the path must be provided in the correct order.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="placeholderText">
-                    <string>e.g. SEG-GLU-1[-OE1], SEG-ASP-2[-OD1], SEG-THR-3[-OG1]</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
               <item row="0" column="0">
                <widget class="QGroupBox" name="groupBox_13">
                 <property name="title">
@@ -1980,73 +2015,6 @@
                 </layout>
                </widget>
               </item>
-              <item row="4" column="0">
-               <widget class="QGroupBox" name="groupBox_16">
-                <property name="title">
-                 <string>5 Between Segments or Molecules</string>
-                </property>
-                <layout class="QHBoxLayout" name="horizontalLayout_12">
-                 <item>
-                  <widget class="QLabel" name="label_22">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>segment 1</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="line_bonds_filter_sega_2">
-                   <property name="maximumSize">
-                    <size>
-                     <width>60</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Filter for water wires between two segments or molecules. Leave the field for segment 2 blank to filter for bonds between segment 1 and everything else.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_21">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>segment 2</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="line_bonds_filter_segb_2">
-                   <property name="maximumSize">
-                    <size>
-                     <width>60</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Filter for water wires between two segments or molecules. Leave the field for segment 2 blank to filter for bonds between segment 1 and everything else.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
               <item row="0" column="1">
                <widget class="QGroupBox" name="groupBox_14">
                 <property name="title">
@@ -2129,6 +2097,132 @@
                 <property name="text">
                  <string>Apply Filters</string>
                 </property>
+               </widget>
+              </item>
+              <item row="1" column="0" rowspan="2">
+               <widget class="QGroupBox" name="groupBox_2">
+                <property name="title">
+                 <string>3 Specific Path</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_25">
+                 <item row="0" column="0">
+                  <widget class="QTextEdit" name="textedit_bonds_path_2">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Set the graph to a specific path of nodes. The nodes in the path must be provided in the correct order.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="placeholderText">
+                    <string>e.g. SEG-GLU-1[-OE1], SEG-ASP-2[-OD1], SEG-THR-3[-OG1]</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="3" column="0" rowspan="2">
+               <widget class="QGroupBox" name="groupBox_16">
+                <property name="title">
+                 <string>5 Between Segments or Molecules</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_8">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_22">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>segment 1</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QLabel" name="label_21">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>segment 2</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="line_bonds_filter_sega_2">
+                   <property name="maximumSize">
+                    <size>
+                     <width>60</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Filter for water wires between two segments or molecules. Leave the field for segment 2 blank to filter for bonds between segment 1 and everything else.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="3">
+                  <widget class="QLineEdit" name="line_bonds_filter_segb_2">
+                   <property name="maximumSize">
+                    <size>
+                     <width>60</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Filter for water wires between two segments or molecules. Leave the field for segment 2 blank to filter for bonds between segment 1 and everything else.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="line_bonds_filter_resa_2">
+                   <property name="maximumSize">
+                    <size>
+                     <width>60</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="3">
+                  <widget class="QLineEdit" name="line_bonds_filter_resb_2">
+                   <property name="maximumSize">
+                    <size>
+                     <width>60</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_26">
+                   <property name="text">
+                    <string>resname 1</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QLabel" name="label_27">
+                   <property name="text">
+                    <string>resname 2</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
              </layout>

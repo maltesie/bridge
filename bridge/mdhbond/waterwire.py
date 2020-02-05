@@ -40,13 +40,13 @@ class WireAnalysis(NetworkAnalysis):
     def __init__(self, selection=None, structure=None, trajectories=None, distance=3.5, cut_angle=60., 
                  start=None, stop=None, step=1, additional_donors=[], 
                  additional_acceptors=[], exclude_donors=[], exclude_acceptors=[], 
-                 special_naming=[], check_angle=True, residuewise=True, add_donors_without_hydrogen=False, restore_filename=None):
+                 ions=[], check_angle=True, residuewise=True, add_donors_without_hydrogen=False, restore_filename=None):
         
         super(WireAnalysis, self).__init__(selection=selection, structure=structure, trajectories=trajectories, 
              distance=distance, cut_angle=cut_angle, start=start, stop=stop, step=step, 
              additional_donors=additional_donors, additional_acceptors=additional_acceptors,
              exclude_donors=exclude_donors, exclude_acceptors=exclude_acceptors,
-             special_naming=special_naming, check_angle=check_angle, residuewise=residuewise,
+             ions=ions, check_angle=check_angle, residuewise=residuewise,
              add_donors_without_hydrogen=add_donors_without_hydrogen, restore_filename=restore_filename)
         
         if restore_filename != None: return
@@ -55,7 +55,7 @@ class WireAnalysis(NetworkAnalysis):
         if not sorted_selection.donors: da_selection = sorted_selection.acceptors
         elif not sorted_selection.acceptors: da_selection = sorted_selection.donors
         else: da_selection = _MDAnalysis.core.groups.AtomGroup(sorted_selection.donors + sorted_selection.acceptors)
-        da_ids = _hf.MDA_info_list(da_selection, special_naming=special_naming)
+        da_ids = _hf.MDA_info_list(da_selection)
         self.hashs = {}
         self.hash_table = {}
         self.wire_lengths = {}
@@ -366,11 +366,11 @@ class WireAnalysis(NetworkAnalysis):
                 except KeyError:
                     triplets.append((u,v,avg[v+':'+u]))
             weighted_component.add_weighted_edges_from(triplets)
-            node_set = _nx.bellman_ford_path(weighted_component, start, goal)
-            print(len(component), len(weighted_component))
+            node_set = _nx.all_shortest_paths(weighted_component, start, goal, weight='weight')
         else: raise AssertionError('start and goal nodes are not connected')
         path_graph = _nx.Graph()
-        path_graph.add_edges_from(_hf.pairwise(node_set))
+        for path in node_set:
+            path_graph.add_edges_from(_hf.pairwise(path))
         self.applied_filters['avg_least_bonds']=(start, goal)
         self.filtered_graph = path_graph
         self._generate_filtered_results_from_filtered_graph()
