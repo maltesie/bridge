@@ -1,17 +1,6 @@
 # Bridge
 PyMol plugin for hydrogen bond and water wire analysis of crystal structures and MD simulations.
 
-## State of Publication
-
-The code for this project will be publically available when the article
-
-Malte Siemers, Michalis Lazaratos, Konstantina Karathanou,
-Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar. 
-Bridge: A graph-based algorithm to analyze dynamic H-bond networks 
-in membrane proteins, Journal of Chemical Theory and Computation, under revision October 2019.
-
-is published.
-
 ## Copyright Notice and Disclaimer
 
 This program is free software: you can redistribute it and/or modify
@@ -33,7 +22,7 @@ If you use this software or anything it produces for work to be published,
 please cite:
    
 Malte Siemers, Michalis Lazaratos, Konstantina Karathanou, Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar.
-Bridge: A graph-based algorithm to analyze dynamic H-bond networks in membrane proteins, Journal of Chemical Theory and Computation, under revision October 2019.
+Bridge: A graph-based algorithm to analyze dynamic H-bond networks in membrane proteins, Journal of Chemical Theory and Computation, 2019.
 
 and
 
@@ -44,7 +33,7 @@ The Journal of Physical Chemistry B 2018 122 (17), 4625-4641 <br/>
 ## Installation Guide
 
 Bridge comes as a pymol plugin and depends on MDAnalysis (0.19.2+). 
-To install pymol, we recommend using the miniconda python distribution 
+To install pymol, we recommend using the miniconda python distribution for python 3
 (https://docs.conda.io/en/latest/miniconda.html). If miniconda is set up 
 correctly you can install pymol and MDAnalysis with:
 
