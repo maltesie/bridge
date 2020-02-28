@@ -92,6 +92,7 @@ class NetworkAnalysis(BasicFunctionality):
         self.residuewise=residuewise
         self._exclude_backbone_backbone = True
         self.add_missing_residues = 0
+        self._connection_position = None
         
     def filter_occupancy(self, min_occupancy, use_filtered=True):
         if use_filtered: results = self.filtered_results
@@ -386,9 +387,8 @@ class NetworkAnalysis(BasicFunctionality):
                 else: centralities[node][i] = centrality_i[node]
         if weight is None: 
             for node in centralities: centralities[node] = _np.round(centralities[node].mean(),2)
-        else:
-            ma = max(centralities.values())
-            for node in centralities: centralities[node] = _np.round((centralities[node].mean()/ma)/weight,2)
+        else: 
+            for node in centralities: centralities[node] = _np.round(centralities[node].mean()/weight,2)
         if filename is not None:
             string = centrality_type + ' centrality values:\n\n'
             mc = max(centralities.values())
@@ -400,6 +400,23 @@ class NetworkAnalysis(BasicFunctionality):
             with open(filename, 'w') as f:
                 f.write(string)
         return centralities
+       
+    def compute_average_position_of_connection(self, use_filtered=True):
+        if use_filtered: results = self.filtered_results
+        else: results = self.initial_results
+        position = {key:_np.zeros(3) for key in results}
+        if self.residuewise: all_id = _np.array(self._all_ids+self._ions_ids)
+        else: all_id = _np.array(self._all_ids_atomwise+self._ions_ids_atomwise)
+        all_coordinates = _np.vstack((self._da_selection.positions, self._water.positions, _np.array(self._ions.positions).reshape((-1,3))))
+        residues = _np.array([(key.split(':')[0], key.split(':')[1]) for key in results])
+        #bonds_binary = np.array([results[key] for key in results]).reshape((len(results), -1))
+        for i,ts in enumerate(self._universe.trajectory[self._trajectory_slice]):
+            for ii, bond in enumerate(results):
+                if results[bond][i]: position[bond] += (all_coordinates[all_id == residues[ii][0]].reshape((-1, 3)).mean(0) + all_coordinates[all_id == residues[ii][1]].reshape((-1, 3)).mean(0)) / 2
+        for key in position:
+            position[key] /= results[key].sum()
+        self._connection_position = position
+        return position
             
     def draw_multi_segment_connection_timeseries(self, segnames=None, colors=None, use_filtered=True, filename=None, return_figure=False):
         if use_filtered: results = self.filtered_results

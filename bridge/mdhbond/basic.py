@@ -66,7 +66,7 @@ class BasicFunctionality(object):
         self.initial_results = {}
         self.filtered_results = {}
         self.nb_frames = len([0 for i in self._universe.trajectory[self._trajectory_slice]])
-        self.applied_filters = {'segnames':None, 'shortest_paths':None, 'single_path':None, 'occupancy':None, 'connected_component':None, 'shells':None, 'avg_least_bonds':None, 'backbone':None}
+        self.applied_filters = {'resnames':None, 'segnames':None, 'shortest_paths':None, 'single_path':None, 'occupancy':None, 'connected_component':None, 'shells':None, 'avg_least_bonds':None, 'backbone':None}
         
     def dump_to_file(self, fname):
         tmp = _cp.copy(self)

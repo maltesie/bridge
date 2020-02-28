@@ -62,7 +62,7 @@ class WireAnalysis(NetworkAnalysis):
         da_u, da_ind, da_inv = _np.unique(da_ids, return_index=True, return_inverse=True)
         self.da_trans = da_ind[da_inv]
     
-    def set_water_wires_csr(self, max_water=5, allow_direct_bonds = True):
+    def set_water_wires_csr(self, max_water=5, allow_direct_bonds = True, water_in_convex_hull=False):
         
         distances = {}
         path_hashs = {}
@@ -86,8 +86,13 @@ class WireAnalysis(NetworkAnalysis):
             local_water_index = []
             [local_water_index.extend(l) for l in water_tree.query_ball_point(selection_coordinates, float(max_water+1)*self.distance/2.)]
             local_water_index = _np.unique(local_water_index)
-    
             local_water_coordinates = water_coordinates[local_water_index]
+            
+            if water_in_convex_hull:
+                hull = _sp.Delaunay(selection_coordinates)
+                local_water_index_hull = (hull.find_simplex(local_water_coordinates) != -1).nonzero()[0]
+                local_water_coordinates = water_coordinates[local_water_index[local_water_index_hull]]
+            
             local_water_tree = _sp.cKDTree(local_water_coordinates)
             
             local_water_index += self._first_water_id
@@ -181,7 +186,7 @@ class WireAnalysis(NetworkAnalysis):
         self.first_frame_dict = {}
 
 
-    def set_water_wires(self, max_water=5, allow_direct_bonds=True):
+    def set_water_wires(self, max_water=5, allow_direct_bonds=True, water_in_convex_hull=False):
         
         intervals_results = {}
         results = {}
@@ -207,6 +212,12 @@ class WireAnalysis(NetworkAnalysis):
             [local_water_index.extend(l) for l in water_tree.query_ball_point(selection_coordinates, float(max_water+1)*self.distance/2.)]
             local_water_index = _np.unique(local_water_index)
             local_water_coordinates = water_coordinates[local_water_index]
+            
+            if water_in_convex_hull:
+                hull = _sp.Delaunay(selection_coordinates)
+                local_water_index_hull = (hull.find_simplex(local_water_coordinates) != -1).nonzero()[0]
+                local_water_coordinates = water_coordinates[local_water_index[local_water_index_hull]]
+                
             local_water_tree = _sp.cKDTree(local_water_coordinates)
             
             local_water_index += self._first_water_id
@@ -303,9 +314,9 @@ class WireAnalysis(NetworkAnalysis):
         self.occupancy_dict = {}
         self.first_frame_dict = {}
 
-    def set_explicit_water_wires(self, max_water=5, permit_direct_bonds=True):
+    def set_explicit_water_wires(self, max_water=5, allow_direct_bonds=True, water_in_convex_hull=False):
         
-        self.set_water_wires(max_water)
+        self.set_water_wires(max_water, allow_direct_bonds, water_in_convex_hull)
         
         filtered_results = {}
         for wire_key in self.hashs:
@@ -316,7 +327,7 @@ class WireAnalysis(NetworkAnalysis):
                 try:
                     w_string = ':'.join([self._all_ids[w_id] for w_id in self.hash_table[h]])
                 except KeyError:
-                    if permit_direct_bonds: w_string = wire_key
+                    if allow_direct_bonds: w_string = wire_key
                     else: break
                 try:
                     filtered_results[occupancy[i]].append((w_string, hash_index[filter_occupancy][i], self.hashs[wire_key] == h))

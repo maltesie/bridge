@@ -49,7 +49,7 @@ def run_plugin_gui():
     Open our custom dialog
     '''
     # entry point to PyMOL's API
-    from pymol import cmd
+    #from pymol import cmd
     from .mdhbond import HbondAnalysis
     from .mdhbond import WireAnalysis
     from .mdhbond.helpfunctions import donor_names_global, acceptor_names_global
@@ -142,6 +142,14 @@ def run_plugin_gui():
     dialog_plotting = QtWidgets.QDialog()
     form_plotting = loadUi(uifile_plotting, dialog_plotting)
     
+    uifile_graph_bonds = os.path.join(os.path.dirname(__file__), 'advanced_graph_visualization_bonds.ui')
+    dialog_graph_bonds = QtWidgets.QDialog()
+    form_graph_bonds = loadUi(uifile_graph_bonds, dialog_graph_bonds)
+    
+    uifile_graph_wires = os.path.join(os.path.dirname(__file__), 'advanced_graph_visualization_wires.ui')
+    dialog_graph_wires = QtWidgets.QDialog()
+    form_graph_wires = loadUi(uifile_graph_wires, dialog_graph_wires)
+    
     global static_canvas
     static_canvas = FigureCanvas(Figure(figsize=(6.5, 4)))
     form_plotting.gridLayout_22.addWidget(static_canvas)
@@ -151,7 +159,7 @@ def run_plugin_gui():
     form_error = loadUi(uifile_error, dialog_error)
     
     def write_license():
-        print("\n\n    Bridge\n\n    This program is free software: you can redistribute it and/or modify\n    it under the terms of the GNU General Public License as published by\n    the Free Software Foundation, either version 3 of the License, or\n    (at your option) any later version.\n\n    This program is distributed in the hope that it will be useful,\n    but WITHOUT ANY WARRANTY; without even the implied warranty of\n    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n    GNU General Public License for more details.\n\n    You should have received a copy of the GNU General Public License\n    along with this program.  If not, see <https://www.gnu.org/licenses/>.\n\n    Author: Malte Siemers, Freie Universität Berlin\n\n    If you use this software or anything it produces for work to be published,\n    please cite:\n\n    Malte Siemers, Michalis Lazaratos, Konstantina Karathanou,\n    Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar.\n    Bridge: A graph-based algorithm to analyze dynamic H-bond networks\n    in membrane proteins, Journal of Chemical Theory and Computation,\n    under revision October 2019.\n\n    and\n\n    Federico Guerra, Malte Siemers, Christopher Mielack, and Ana-Nicoleta Bondar\n    Dynamics of Long-Distance Hydrogen-Bond Networks in Photosystem II\n    The Journal of Physical Chemistry B 2018 122 (17), 4625-4641")
+        print("\n\n    Bridge\n\n    This program is free software: you can redistribute it and/or modify\n    it under the terms of the GNU General Public License as published by\n    the Free Software Foundation, either version 3 of the License, or\n    (at your option) any later version.\n\n    This program is distributed in the hope that it will be useful,\n    but WITHOUT ANY WARRANTY; without even the implied warranty of\n    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n    GNU General Public License for more details.\n\n    You should have received a copy of the GNU General Public License\n    along with this program.  If not, see <https://www.gnu.org/licenses/>.\n\n    Author: Malte Siemers, Freie Universität Berlin\n\n    If you use this software or anything it produces for work to be published,\n    please cite:\n\n    Malte Siemers, Michalis Lazaratos, Konstantina Karathanou,\n    Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar.\n    Bridge: A graph-based algorithm to analyze dynamic H-bond networks\n    in membrane proteins,\n    Journal of Chemical Theory and Computation 2019, 15 (12) 6781-6798\n\n    and\n\n    Federico Guerra, Malte Siemers, Christopher Mielack, and Ana-Nicoleta Bondar\n    Dynamics of Long-Distance Hydrogen-Bond Networks in Photosystem II\n    The Journal of Physical Chemistry B 2018 122 (17), 4625-4641")
     
     def draw_figure_to_canvas(f, print_string):  
         global current_figure
@@ -200,21 +208,80 @@ def run_plugin_gui():
     
     def save_wires_data():
         filename = getSaveFileNameWithExt(dialog_plotting, 'Save', filter='ASCII data file (*.txt)')
+        if not filename: return
         save_str = 'wire_partner_1 wire_partner_2 occupancy\n\n'
         for bond in wa.filtered_results:
             ba, bb = bond.split(':')
             save_str += ba + ' ' + bb + ' ' + str(np.round(wa.filtered_results[bond].mean(), 3))+'\n'
         with open(filename, 'w') as file:
             file.write(save_str)
+            
+    def save_wires_data_advanced():
+        filename = getSaveFileNameWithExt(dialog_plotting, 'Save', filter='ASCII data file (*.txt)')
+        if not filename: return
+        try:
+            weight = float(form_graph_wires.lineEdit_wires_color_weight.text())
+        except: 
+            weight = None
+        if form_graph_wires.radioButton_bonds_colors_segments.isChecked():
+            save_str = 'wire_partner_1 wire_partner_2 occupancy average_water\n\n'
+            for bond in wa.filtered_results:
+                ba, bb = bond.split(':')
+                save_str += ba + ' ' + bb + ' ' + str(np.round(wa.filtered_results[bond].mean(), 2)) + ' ' + str(np.round(wa.wire_lengths[bond][wa.wire_lengths[bond]!=np.inf].mean(), 2)) +'\n'
+        elif form_graph_wires.radioButton_bonds_betweenness.isChecked():
+            save_str = 'node betweenness_centrality\n\n'
+            betweenness = wa.compute_centrality(centrality_type='betweenness', weight=weight)
+            for node in betweenness:
+                save_str += node + ' ' + str(np.round(betweenness[node], 2))+'\n'
+        elif form_graph_wires.radioButton_bonds_degree.isChecked():
+            save_str = 'node degree_centrality\n\n'
+            degree = wa.compute_centrality(centrality_type='degree', weight=weight)
+            for node in degree:
+                save_str += node + ' ' + str(np.round(degree[node], 2))+'\n'
+        with open(filename, 'w') as file:
+            file.write(save_str)
     
     def save_bonds_data():
         filename = getSaveFileNameWithExt(dialog_plotting, 'Save', filter='ASCII data file (*.txt)')
+        if not filename: return
         save_str = 'H_bond_partner_1 H_bond_partner_2 occupancy\n\n'
         for bond in hba.filtered_results:
             ba, bb = bond.split(':')
             save_str += ba + ' ' + bb + ' ' + str(np.round(hba.filtered_results[bond].mean(), 3))+'\n'
         with open(filename, 'w') as file:
             file.write(save_str)
+            
+    def save_bonds_data_advanced():
+        filename = getSaveFileNameWithExt(dialog_plotting, 'Save', filter='ASCII data file (*.txt)')
+        if not filename: return
+        try:
+            weight = float(form_graph_bonds.lineEdit_bonds_color_weight.text())
+        except: 
+            weight = None
+        if form_graph_bonds.radioButton_bonds_colors_segments.isChecked():
+            save_str = 'H_bond_partner_1 H_bond_partner_2 occupancy\n\n'
+            for bond in hba.filtered_results:
+                ba, bb = bond.split(':')
+                save_str += ba + ' ' + bb + ' ' + str(np.round(hba.filtered_results[bond].mean(), 2)) +'\n'
+        elif form_graph_bonds.radioButton_bonds_betweenness.isChecked():
+            save_str = 'node betweenness_centrality\n\n'
+            betweenness = hba.compute_centrality(centrality_type='betweenness', weight=weight)
+            for node in betweenness:
+                save_str += node + ' ' + str(np.round(betweenness[node], 2))+'\n'
+        elif form_graph_bonds.radioButton_bonds_degree.isChecked():
+            save_str = 'node degree_centrality\n\n'
+            degree = hba.compute_centrality(centrality_type='degree', weight=weight)
+            for node in degree:
+                save_str += node + ' ' + str(np.round(degree[node], 2))+'\n'
+        with open(filename, 'w') as file:
+            file.write(save_str)
+    
+    def load_advanced_wires():
+        dialog_graph_wires.show()
+        
+    def load_advanced_bonds():
+        dialog_graph_bonds.show() 
+    
     
     def load_plotting_wires():
         enable_tabs()
@@ -410,7 +477,7 @@ def run_plugin_gui():
         form.line_bonds_filter_segb.setText('')
         form.line_bonds_filter_resa.setText('')
         form.line_bonds_filter_resb.setText('')
-        form.line_bonds_order.setText('')
+        form.line_bonds_order_test.setText('')
         form.checkBox_bonds_backbone.setChecked(False)
         filter_bonds()
         form.repaint()
@@ -436,11 +503,13 @@ def run_plugin_gui():
         backbone = form.checkBox_bonds_backbone.isChecked()
         form.textedit_bonds_active_filters.clear()
         use_filtered = False
+        order = [int(a) for a in form.line_bonds_order_test.text().replace(' ','').split(',') if a!='']
+        if len(order) == 0: order=[6,3,1,2,4,5] 
         try:
-            order = [int(a) for a in form.line_bonds_order.text().replace(' ','').split(',') if a!='']
+            order = [int(a) for a in form.line_bonds_order_test.text().replace(' ','').split(',') if a!='']
             if len(order) == 0: order=[6,3,1,2,4,5] 
         except:
-            error('order must be integers separated by commas')
+            error('order must be integers separated by commas or empty')
             return
         for a in order:
             if path_explicit != '' and a==3:
@@ -536,12 +605,59 @@ def run_plugin_gui():
         form_plotting.button_bonds_compare_bonds_timeseries.setEnabled(not form_plotting.checkbox_bonds_timeseries_segnames.isChecked())
     
     def draw_bonds_graph():
-        color_d={}
-        if form.line_bonds_colors.text() != '': color_d = {key.split(':')[0]:key.split(':')[1] for key in form.line_bonds_colors.text().replace(' ','').split(',')}
-        labels = form.checkbox_bonds_graph_labels.isChecked()
         form.button_bonds_draw_graph.setText('Working...')
         form.button_bonds_draw_graph.repaint()
-        hba.draw_graph(draw_edge_occupancy=form.checkBox_bonds_interregion.isChecked(), color_dict=color_d, draw_labels=labels, node_factor=0.6)
+        hba.draw_graph(draw_edge_occupancy=False, draw_labels=True, node_factor=0.6)
+        form.button_bonds_draw_graph.setText('Draw')
+        form.button_bonds_draw_graph.repaint()
+        
+    def draw_bonds_graph_advanced():
+        color_d={}
+        if form_graph_bonds.line_bonds_colors.text() != '': color_d = {key.split(':')[0]:key.split(':')[1] for key in form_graph_bonds.line_bonds_colors.text().replace(' ','').split(',')}
+        centrality = None
+        weight = None
+        if form_graph_bonds.lineEdit_bonds_color_weight.text() != '': 
+            try: weight = float(form_graph_bonds.lineEdit_bonds_color_weight.text())
+            except: pass
+        if form_graph_bonds.radioButton_bonds_betweenness.isChecked():
+            centrality = hba.compute_centrality(centrality_type='betweenness', weight=None)
+        elif form_graph_bonds.radioButton_bonds_degree.isChecked():
+            centrality = hba.compute_centrality(centrality_type='degree', normalize=True, weight=None)
+        labels = form_graph_bonds.checkBox_bonds_graph_labels.isChecked()
+        interregion = form_graph_bonds.checkBox_bonds_interregion.isChecked()
+        occupancy = form_graph_bonds.checkBox_bonds_occupancy.isChecked()
+        form.button_bonds_draw_graph.setText('Working...')
+        form.button_bonds_draw_graph.repaint()
+        hba.draw_graph(draw_edge_occupancy=occupancy, highlight_interregion=interregion, centrality=centrality, max_centrality=weight, color_dict=color_d, draw_labels=labels, node_factor=0.6)
+        form_graph_bonds.close()
+        form.button_bonds_draw_graph.setText('Compare')
+        form.button_bonds_draw_graph.repaint()
+        
+    def draw_bonds_graph_compare():
+        filename = getOpenFileNameWithExt(dialog_graph_bonds, 'Open', filter='hydrogen bond analysis file (*.hba);;water wire analysis file (*.wwa)')
+        if not filename: return
+        hba2 = HbondAnalysis(restore_filename=filename)
+        mutations=None
+        if form_graph_bonds.lineEdit_mutations.text() != '':
+            mutations = form_graph_bonds.lineEdit_mutations.text().replace(' ', '').split(',')
+        color_d={}
+        if form_graph_bonds.line_bonds_colors.text() != '': color_d = {key.split(':')[0]:key.split(':')[1] for key in form_graph_bonds.line_bonds_colors.text().replace(' ','').split(',')}
+        centrality = None
+        weight = None
+        if form_graph_bonds.lineEdit_bonds_color_weight.text() != '': 
+            try: weight = float(form_graph_bonds.lineEdit_bonds_color_weight.text())
+            except: pass
+        if form_graph_bonds.radioButton_bonds_betweenness.isChecked():
+            centrality = hba.compute_centrality(centrality_type='betweenness', weight=None)
+        elif form_graph_bonds.radioButton_bonds_degree.isChecked():
+            centrality = hba.compute_centrality(centrality_type='degree', normalize=True, weight=None)
+        labels = form_graph_bonds.checkBox_bonds_graph_labels.isChecked()
+        interregion = form_graph_bonds.checkBox_bonds_interregion.isChecked()
+        occupancy = form_graph_bonds.checkBox_bonds_occupancy.isChecked()
+        form.button_bonds_draw_graph.setText('Working...')
+        form.button_bonds_draw_graph.repaint()
+        hba.draw_graph(mutations=mutations, compare_to=hba2, draw_edge_occupancy=occupancy, highlight_interregion=interregion, centrality=centrality, max_centrality=weight, color_dict=color_d, draw_labels=labels, node_factor=0.6)
+        form_graph_bonds.close()
         form.button_bonds_draw_graph.setText('Draw')
         form.button_bonds_draw_graph.repaint()
         
@@ -844,6 +960,7 @@ def run_plugin_gui():
     
     def save_hbonds_plots():
         filename = getSaveFileNameWithExt(dialog_plotting, 'Save', filter='Portable Network Graphics (*.png);;Vector Graphic (*.eps)')
+        if not filename: return
         form_plotting.line_bonds_filename.setText(filename)
         
     def save_hbonds_to_file():
@@ -856,9 +973,19 @@ def run_plugin_gui():
         global hba
         form.button_bonds_restore.setText('Working...')
         form.button_bonds_restore.repaint()
-
-        hba = HbondAnalysis(restore_filename=filename)
-        hba._reload_universe()
+        try:
+            hba = HbondAnalysis(restore_filename=filename)
+            hba._reload_universe()
+        except FileNotFoundError:
+            estring = 'Couldn`t find the following structure and/or trajectory file(s):\n' 
+            if not os.path.isfile(hba._structure): estring += hba._structure + '\n'
+            if hba._trajectories is not None: 
+                for tra in hba._trajectories: 
+                    if not os.path.isfile(tra): estring += tra + '\n'
+            error(estring)
+            form.button_bonds_restore.setText('Restore State')
+            form.button_bonds_restore.repaint()
+            return
         form.group_set_bonds.setEnabled(True)
         form.group_bonds_filter.setEnabled(True)
         #form.group_bonds_compute.setEnabled(True)
@@ -971,6 +1098,10 @@ def run_plugin_gui():
     #form.button_bonds_graph_save.clicked.connect(save_hbonds_graph)
     form.checkBox_angle.stateChanged.connect(toggle_bonds_angle)
     form.pushButton_bonds_save_data.clicked.connect(save_bonds_data)
+    form.pushButton_bonds_advanced.clicked.connect(load_advanced_bonds)
+    form_graph_bonds.pushButton_bonds_save_data.clicked.connect(save_bonds_data_advanced)
+    form_graph_bonds.pushButton_draw_graph.clicked.connect(draw_bonds_graph_advanced)
+    form_graph_bonds.pushButton_bonds_compare_graphs.clicked.connect(draw_bonds_graph_compare)
     
     def browse_wire_structure():
         filename = getOpenFileNameWithExt(
@@ -1128,7 +1259,7 @@ def run_plugin_gui():
             order = [int(a) for a in form.line_wires_order.text().replace(' ','').split(',') if a!='']
             if len(order) == 0: order=[3,1,2,4,5] 
         except:
-            error('order must be integers separated by commas')
+            error('order must be integers separated by commas or empty')
             return
         for a in order:
             if path_explicit != '' and a==3:
@@ -1214,14 +1345,61 @@ def run_plugin_gui():
         form.textedit_wire_results.setText(projection_printable)
     
     def draw_wire_graph():
-        color_d={}
-        if form.line_wire_colors.text() != '': color_d = {key.split(':')[0]:key.split(':')[1] for key in form.line_wire_colors.text().replace(' ','').split(',')}
-        labels = form.checkbox_wire_graph_labels.isChecked() 
         form.button_wire_draw_graph.setText('Working...')
         form.button_wire_draw_graph.repaint()
-        wa.draw_graph(draw_edge_occupancy=form.checkBox_wire_interregion.isChecked(), color_dict=color_d, draw_labels=labels, node_factor=0.6)
+        wa.draw_graph(draw_edge_occupancy=False, draw_labels=True, node_factor=0.6)
         form.button_wire_draw_graph.setText('Draw')
         form.button_wire_draw_graph.repaint()
+        
+    def draw_wire_graph_advanced():
+        color_d={}
+        if form_graph_wires.line_bonds_colors.text() != '': color_d = {key.split(':')[0]:key.split(':')[1] for key in form_graph_wires.line_bonds_colors.text().replace(' ','').split(',')}
+        centrality = None
+        weight = None
+        if form_graph_wires.lineEdit_bonds_color_weight.text() != '': 
+            try: weight = float(form_graph_wires.lineEdit_bonds_color_weight.text())
+            except: pass
+        if form_graph_wires.radioButton_bonds_betweenness.isChecked():
+            centrality = wa.compute_centrality(centrality_type='betweenness', weight=None)
+        elif form_graph_wires.radioButton_bonds_degree.isChecked():
+            centrality = wa.compute_centrality(centrality_type='degree', normalize=True, weight=None)
+        labels = form_graph_wires.checkBox_bonds_graph_labels.isChecked()
+        interregion = form_graph_wires.checkBox_bonds_interregion.isChecked()
+        occupancy = form_graph_wires.checkBox_bonds_occupancy.isChecked()
+        form.button_bonds_draw_graph.setText('Working...')
+        form.button_bonds_draw_graph.repaint()
+        wa.draw_graph(draw_edge_occupancy=occupancy, highlight_interregion=interregion, centrality=centrality, max_centrality=weight, color_dict=color_d, draw_labels=labels, node_factor=0.6)
+        form_graph_wires.close()
+        form.button_bonds_draw_graph.setText('Compare')
+        form.button_bonds_draw_graph.repaint()
+        
+    def draw_wire_graph_compare():
+        filename = getOpenFileNameWithExt(dialog_graph_bonds, 'Open', filter='water wire analysis file (*.wwa);;hydrogen bond analysis file (*.hba)')
+        if not filename: return
+        hba2 = HbondAnalysis(restore_filename=filename)
+        mutations=None
+        if form_graph_wires.lineEdit_mutations.text() != '':
+            mutations = form_graph_wires.lineEdit_mutations.text().replace(' ', '').split(',')
+        color_d={}
+        if form_graph_wires.line_bonds_colors.text() != '': color_d = {key.split(':')[0]:key.split(':')[1] for key in form_graph_wires.line_bonds_colors.text().replace(' ','').split(',')}
+        centrality = None
+        weight = None
+        if form_graph_wires.lineEdit_bonds_color_weight.text() != '': 
+            try: weight = float(form_graph_wires.lineEdit_bonds_color_weight.text())
+            except: pass
+        if form_graph_wires.radioButton_bonds_betweenness.isChecked():
+            centrality = wa.compute_centrality(centrality_type='betweenness', weight=None)
+        elif form_graph_wires.radioButton_bonds_degree.isChecked():
+            centrality = wa.compute_centrality(centrality_type='degree', normalize=True, weight=None)
+        labels = form_graph_wires.checkBox_bonds_graph_labels.isChecked()
+        interregion = form_graph_wires.checkBox_bonds_interregion.isChecked()
+        occupancy = form_graph_wires.checkBox_bonds_occupancy.isChecked()
+        form.button_bonds_draw_graph.setText('Working...')
+        form.button_bonds_draw_graph.repaint()
+        wa.draw_graph(mutations=mutations, compare_to=hba2, draw_edge_occupancy=occupancy, highlight_interregion=interregion, centrality=centrality, max_centrality=weight, color_dict=color_d, draw_labels=labels, node_factor=0.6)
+        form_graph_wires.close()
+        form.button_bonds_draw_graph.setText('Draw')
+        form.button_bonds_draw_graph.repaint()
     
     def save_wire_graph():
         color_d={}
@@ -1530,6 +1708,7 @@ def run_plugin_gui():
     
     def save_wires_plots():
         filename = getSaveFileNameWithExt(dialog_plotting, 'Save', filter='Portable Network Graphics (*.png);;Vector Graphic (*.eps)')
+        if not filename: return
         form_plotting.line_wires_filename.setText(filename)
     
     def save_wires_to_file():
@@ -1542,8 +1721,19 @@ def run_plugin_gui():
         global wa
         form.button_wire_restore.setText('Working...')
         form.button_wire_restore.repaint()
-        wa = WireAnalysis(restore_filename=filename)
-        wa._reload_universe()
+        try:
+            wa = WireAnalysis(restore_filename=filename)
+            wa._reload_universe()
+        except FileNotFoundError:
+            estring = 'Couldn`t find the following structure and/or trajectory file(s):\n' 
+            if not os.path.isfile(wa._structure): estring += wa._structure + '\n'
+            if wa._trajectories is not None: 
+                for tra in wa._trajectories: 
+                    if not os.path.isfile(tra): estring += tra + '\n'
+            error(estring)
+            form.button_wire_restore.setText('Restore State')
+            form.button_wire_restore.repaint()
+            return
         form.group_wire_set.setEnabled(True)
         form.group_bonds_filter_2.setEnabled(True)
         #form.group_wire_compute.setEnabled(True)
@@ -1651,11 +1841,13 @@ def run_plugin_gui():
     form.button_wire_restore.clicked.connect(restore_wires_from_file)
     #form.button_wire_graph_save.clicked.connect(save_wire_graph)
     form.checkBox_wires_angle.stateChanged.connect(toggle_wire_angle)
-    
+    form.pushButton_wires_advanced.clicked.connect(load_advanced_wires)
     form_plotting.pushButton.clicked.connect(save_plot)
     form_plotting.button_plotting_save_data.clicked.connect(save_data)
     form.pushButton_wires_save_data.clicked.connect(save_wires_data)
-    
+    form_graph_wires.pushButton_bonds_save_data.clicked.connect(save_wires_data_advanced)
+    form_graph_wires.pushButton_bonds_compare_graphs.clicked.connect(draw_wire_graph_compare)
+    form_graph_wires.pushButton_draw_graph.clicked.connect(draw_wire_graph_advanced)
     write_license()
     
     dialog.show()
