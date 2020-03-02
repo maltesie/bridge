@@ -175,6 +175,9 @@
               </item>
               <item row="3" column="6">
                <widget class="QLineEdit" name="line_bonds_ions">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Include ions in the search. Interactions with ions are defined only by distance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="placeholderText">
                  <string>e.g. CLA</string>
                 </property>
@@ -999,6 +1002,9 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_bonds_advanced">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open the advanced options dialog for drawing graphs.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="text">
                    <string>Advanced</string>
                   </property>
@@ -2057,6 +2063,9 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_wires_advanced">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open the advanced options dialog for drawing graphs.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="text">
                    <string>Advanced</string>
                   </property>

@@ -18,8 +18,14 @@
 #    
 #    Malte Siemers, Michalis Lazaratos, Konstantina Karathanou,
 #    Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar. 
-#    Bridge: A graph-based algorithm to analyze dynamic H-bond networks 
-#    in membrane proteins, Journal of Chemical Theory and Computation, 2019.
+#    Bridge: A graph-based algorithm to analyze dynamic H-bond networks in
+#    membrane proteins, Journal of Chemical Theory and Computation 15 (12) 6781-6798
+#
+#    and
+#
+#    Federico Guerra, Malte Siemers, Christopher Mielack, and Ana-Nicoleta Bondar
+#    Dynamics of Long-Distance Hydrogen-Bond Networks in Photosystem II
+#    The Journal of Physical Chemistry B 2018 122 (17), 4625-4641
 
 from . import helpfunctions as _hf
 from .network import NetworkAnalysis

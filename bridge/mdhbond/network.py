@@ -18,8 +18,14 @@
 #    
 #    Malte Siemers, Michalis Lazaratos, Konstantina Karathanou,
 #    Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar. 
-#    Bridge: A graph-based algorithm to analyze dynamic H-bond networks 
-#    in membrane proteins, Journal of Chemical Theory and Computation, 2019.
+#    Bridge: A graph-based algorithm to analyze dynamic H-bond networks in
+#    membrane proteins, Journal of Chemical Theory and Computation 15 (12) 6781-6798
+#
+#    and
+#
+#    Federico Guerra, Malte Siemers, Christopher Mielack, and Ana-Nicoleta Bondar
+#    Dynamics of Long-Distance Hydrogen-Bond Networks in Photosystem II
+#    The Journal of Physical Chemistry B 2018 122 (17), 4625-4641
 
 from . import helpfunctions as _hf
 from .basic import BasicFunctionality
@@ -386,9 +392,10 @@ class NetworkAnalysis(BasicFunctionality):
                 if (centrality_type == 'degree') and not normalize: centralities[node][i] = centrality_i[node] * (g_i.number_of_nodes()-1)
                 else: centralities[node][i] = centrality_i[node]
         if weight is None: 
-            for node in centralities: centralities[node] = _np.round(centralities[node].mean(),2)
+            for node in centralities: centralities[node] = _np.round(centralities[node].mean(),3)
         else: 
-            for node in centralities: centralities[node] = _np.round(centralities[node].mean()/weight,2)
+            ma = _np.max(list(centralities.values()))
+            for node in centralities: centralities[node] = _np.round(centralities[node].mean()/ma*weight,3)
         if filename is not None:
             string = centrality_type + ' centrality values:\n\n'
             mc = max(centralities.values())
@@ -396,7 +403,7 @@ class NetworkAnalysis(BasicFunctionality):
                 string += c + ' ' + str(centralities[c]) + '\n'
             string += '\nnormalized to [0,1]:\n'
             for c in centralities:
-                string += c + ' ' + str(_np.round(centralities[c]/mc, 2)) + '\n'
+                string += c + ' ' + str(_np.round(centralities[c]/mc, 3)) + '\n'
             with open(filename, 'w') as f:
                 f.write(string)
         return centralities
@@ -943,6 +950,38 @@ class NetworkAnalysis(BasicFunctionality):
             _plt.close()
             return fig, result_string
         self._save_or_draw(filename, return_figure=return_figure)
+    
+    def draw_centrality_histogram(self, centralities, filename=None, return_figure=False):
+        if isinstance(centralities, dict): 
+            centrality_list = _np.array(list(centralities.values()))
+            nb_systems = 1
+            weights = _np.array([1/len(centrality_list)]*len(centrality_list))
+        elif isinstance(centralities, list): 
+            centrality_list = [_np.array(list(centrality.values())) for centrality in centralities]
+            nb_systems = len(centrality_list)
+            weights = [_np.ones(len(centrality))/len(centrality) for centrality in centrality_list]
+        else: raise AssertionError('centralities must be a dictionary or list of dictionaries.')
+        mi, ma = _np.min(centrality_list), _np.max(centrality_list)
+        fig, ax = _plt.subplots()
+        fig.set_size_inches((9,6))
+        _plt.hist(centrality_list, 
+                 _np.linspace(mi, ma, 10),
+                 histtype='bar',
+                 orientation=u'vertical',
+                 weights=weights,
+                 stacked=False,  
+                 fill=True,
+                 label=['system {}'.format(i) for i in range(nb_systems)],
+                 alpha=0.8, # opacity of the bars
+                 edgecolor = "k")
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        bins = _np.linspace(mi, ma, 10)
+        ax.set_xticks(_np.round(bins, 4))
+        _plt.xlabel('Centrality Value' , fontsize = 16)
+        _plt.ylabel('Normalized Proportion' , fontsize = 16)
+        #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        _plt.legend()
         
     def draw_residue_residue_heatmap(self, average=False, use_filtered=True, filename=None, return_figure=False):
         if use_filtered: results = self.filtered_results

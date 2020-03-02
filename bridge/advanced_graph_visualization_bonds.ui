@@ -51,6 +51,9 @@
       </item>
       <item row="1" column="0" colspan="2">
        <widget class="QCheckBox" name="checkBox_bonds_interregion">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Highlight the edges in the graph that correspond to inter-segment H Bonds.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
          <string>highlight inter-segment H Bonds</string>
         </property>
@@ -82,6 +85,9 @@
           <width>60</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Define a maximum value for the color bar. This can be used to make graphs comparable using the same color scale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -162,6 +168,9 @@ centrality</string>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_bonds_save_data">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Save the displayed graph to a text file. Depending on the selected coloring it will be either the occupancy of the edges or the assigned centrality value of the nodes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Save Data</string>
        </property>
