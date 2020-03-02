@@ -21,8 +21,9 @@ Author: Malte Siemers, Freie Universität Berlin
 If you use this software or anything it produces for work to be published,
 please cite:
    
-Malte Siemers, Michalis Lazaratos, Konstantina Karathanou, Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar.
-Bridge: A graph-based algorithm to analyze dynamic H-bond networks in membrane proteins, Journal of Chemical Theory and Computation, 2019, 15 (12) 6781-6798
+Malte Siemers, Michalis Lazaratos, Konstantina Karathanou, Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar.<br/>
+Bridge: A graph-based algorithm to analyze dynamic H-bond networks in membrane proteins<br/>
+Journal of Chemical Theory and Computation, 2019, 15 (12) 6781-6798<br/>
 
 and
 
