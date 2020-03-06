@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>691</width>
+    <width>755</width>
     <height>228</height>
    </rect>
   </property>
@@ -23,6 +23,14 @@
       <string>colors</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="3" column="2">
+       <widget class="QRadioButton" name="radioButton_bonds_betweenness">
+        <property name="text">
+         <string>betweenness
+centrality</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="0">
        <widget class="QRadioButton" name="radioButton_bonds_colors_segments">
         <property name="text">
@@ -30,6 +38,14 @@
         </property>
         <property name="checked">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QRadioButton" name="radioButton_bonds_degree">
+        <property name="text">
+         <string>degree             max color
+centrality            value</string>
         </property>
        </widget>
       </item>
@@ -55,22 +71,6 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="3">
-       <widget class="QRadioButton" name="radioButton_bonds_degree">
-        <property name="text">
-         <string>degree             max color
-centrality            value</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QRadioButton" name="radioButton_bonds_betweenness">
-        <property name="text">
-         <string>betweenness
-centrality</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="4">
        <widget class="QLineEdit" name="lineEdit_bonds_color_weight">
         <property name="maximumSize">
@@ -81,6 +81,14 @@ centrality</string>
         </property>
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Define a maximum value for the color bar. This can be used to make graphs comparable using the same color scale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QCheckBox" name="checkBox_bonds_weight_centrality">
+        <property name="text">
+         <string>weight
+centrality</string>
         </property>
        </widget>
       </item>

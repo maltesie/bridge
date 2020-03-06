@@ -950,38 +950,6 @@ class NetworkAnalysis(BasicFunctionality):
             _plt.close()
             return fig, result_string
         self._save_or_draw(filename, return_figure=return_figure)
-    
-    def draw_centrality_histogram(self, centralities, filename=None, return_figure=False):
-        if isinstance(centralities, dict): 
-            centrality_list = _np.array(list(centralities.values()))
-            nb_systems = 1
-            weights = _np.array([1/len(centrality_list)]*len(centrality_list))
-        elif isinstance(centralities, list): 
-            centrality_list = [_np.array(list(centrality.values())) for centrality in centralities]
-            nb_systems = len(centrality_list)
-            weights = [_np.ones(len(centrality))/len(centrality) for centrality in centrality_list]
-        else: raise AssertionError('centralities must be a dictionary or list of dictionaries.')
-        mi, ma = _np.min(centrality_list), _np.max(centrality_list)
-        fig, ax = _plt.subplots()
-        fig.set_size_inches((9,6))
-        _plt.hist(centrality_list, 
-                 _np.linspace(mi, ma, 10),
-                 histtype='bar',
-                 orientation=u'vertical',
-                 weights=weights,
-                 stacked=False,  
-                 fill=True,
-                 label=['system {}'.format(i) for i in range(nb_systems)],
-                 alpha=0.8, # opacity of the bars
-                 edgecolor = "k")
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
-        bins = _np.linspace(mi, ma, 10)
-        ax.set_xticks(_np.round(bins, 4))
-        _plt.xlabel('Centrality Value' , fontsize = 16)
-        _plt.ylabel('Normalized Proportion' , fontsize = 16)
-        #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        _plt.legend()
         
     def draw_residue_residue_heatmap(self, average=False, use_filtered=True, filename=None, return_figure=False):
         if use_filtered: results = self.filtered_results
@@ -1018,6 +986,38 @@ class NetworkAnalysis(BasicFunctionality):
             _plt.close()
             return fig, result_string
         self._save_or_draw(filename, return_figure=return_figure)
+    
+    def draw_centrality_histogram(self, centralities, filename=None, return_figure=False):
+        if isinstance(centralities, dict): 
+            centrality_list = _np.array(list(centralities.values()))
+            nb_systems = 1
+            weights = _np.array([1/len(centrality_list)]*len(centrality_list))
+        elif isinstance(centralities, list): 
+            centrality_list = [_np.array(list(centrality.values())) for centrality in centralities]
+            nb_systems = len(centrality_list)
+            weights = [_np.ones(len(centrality))/len(centrality) for centrality in centrality_list]
+        else: raise AssertionError('centralities must be a dictionary or list of dictionaries.')
+        mi, ma = _np.min([_np.min(c) for c in centrality_list]), _np.max([_np.max(c) for c in centrality_list])
+        fig, ax = _plt.subplots()
+        fig.set_size_inches((9,6))
+        _plt.hist(centrality_list, 
+                 _np.linspace(mi, ma, 10),
+                 histtype='bar',
+                 orientation=u'vertical',
+                 weights=weights,
+                 stacked=False,  
+                 fill=True,
+                 label=['system {}'.format(i) for i in range(nb_systems)],
+                 alpha=0.8, # opacity of the bars
+                 edgecolor = "k")
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        bins = _np.linspace(mi, ma, 10)
+        ax.set_xticks(_np.round(bins, 4))
+        _plt.xlabel('Centrality Value' , fontsize = 16)
+        _plt.ylabel('Normalized Proportion' , fontsize = 16)
+        #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        _plt.legend()
     
     def draw_graph(self, draw_edge_occupancy=True, compare_to=None, mutations=None, highlight_interregion=False, in_frame=None, centrality=None, max_centrality=None, default_color='seagreen', node_factor=1.0, draw_labels=True, color_dict={}, filename=None, return_figure=False, draw_base=False, use_filtered=True):
         if compare_to is not None: 
@@ -1148,7 +1148,7 @@ class NetworkAnalysis(BasicFunctionality):
             _nx.draw_networkx_nodes(composed_graph, pos, node_size=900, alpha=0.5, node_color=color_value_list, cmap=cmap, vmin=0.0, vmax=mc)
             sm = _plt.cm.ScalarMappable(cmap=cmap)
             sm.set_array([0.0, mc])
-            _plt.colorbar(sm, ax=_plt.axes())
+            _plt.colorbar(sm, ax=_plt.axes())#, ticks=_np.round(_np.linspace(0.0,mc,5), 2))
         else:
             for color in color_graph:
                 _nx.draw_networkx_nodes(color_graph[color], pos, node_size=900, alpha=0.5, node_color=color)

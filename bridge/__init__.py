@@ -623,15 +623,19 @@ def run_plugin_gui():
             centrality = hba.compute_centrality(centrality_type='betweenness', weight=None)
         elif form_graph_bonds.radioButton_bonds_degree.isChecked():
             centrality = hba.compute_centrality(centrality_type='degree', normalize=True, weight=None)
+        if form_graph_bonds.checkBox_bonds_weight_centrality.isChecked() and (form_graph_bonds.radioButton_bonds_betweenness.isChecked() or form_graph_bonds.radioButton_bonds_degree.isChecked()):
+            ma = np.max(list(centrality.values()))
+            for node in centrality:
+                centrality[node] /= ma
         labels = form_graph_bonds.checkBox_bonds_graph_labels.isChecked()
         interregion = form_graph_bonds.checkBox_bonds_interregion.isChecked()
         occupancy = form_graph_bonds.checkBox_bonds_occupancy.isChecked()
-        form.button_bonds_draw_graph.setText('Working...')
-        form.button_bonds_draw_graph.repaint()
+        form_graph_bonds.pushButton_draw_graph.setText('Working...')
+        form_graph_bonds.pushButton_draw_graph.repaint()
         hba.draw_graph(draw_edge_occupancy=occupancy, highlight_interregion=interregion, centrality=centrality, max_centrality=weight, color_dict=color_d, draw_labels=labels, node_factor=0.6)
         form_graph_bonds.close()
-        form.button_bonds_draw_graph.setText('Compare')
-        form.button_bonds_draw_graph.repaint()
+        form_graph_bonds.pushButton_draw_graph.setText('Draw')
+        form_graph_bonds.pushButton_draw_graph.repaint()
         
     def draw_bonds_graph_compare():
         filename = getOpenFileNameWithExt(dialog_graph_bonds, 'Open', filter='hydrogen bond analysis file (*.hba);;water wire analysis file (*.wwa)')
@@ -643,23 +647,30 @@ def run_plugin_gui():
         color_d={}
         if form_graph_bonds.line_bonds_colors.text() != '': color_d = {key.split(':')[0]:key.split(':')[1] for key in form_graph_bonds.line_bonds_colors.text().replace(' ','').split(',')}
         centrality = None
+        centrality2 = None
         weight = None
         if form_graph_bonds.lineEdit_bonds_color_weight.text() != '': 
             try: weight = float(form_graph_bonds.lineEdit_bonds_color_weight.text())
             except: pass
         if form_graph_bonds.radioButton_bonds_betweenness.isChecked():
-            centrality = hba.compute_centrality(centrality_type='betweenness', weight=None)
+            if form_graph_bonds.checkBox_bonds_weight_centrality.isChecked(): centrality = hba.compute_centrality(centrality_type='betweenness', weight=None)
+            centrality2 = hba2.compute_centrality(centrality_type='betweenness', weight=None)
         elif form_graph_bonds.radioButton_bonds_degree.isChecked():
-            centrality = hba.compute_centrality(centrality_type='degree', normalize=True, weight=None)
+            if form_graph_bonds.checkBox_bonds_weight_centrality.isChecked(): centrality = hba.compute_centrality(centrality_type='degree', normalize=True, weight=None)
+            centrality2 = hba2.compute_centrality(centrality_type='degree', weight=None)
+        if form_graph_bonds.checkBox_bonds_weight_centrality.isChecked() and (form_graph_bonds.radioButton_bonds_betweenness.isChecked() or form_graph_bonds.radioButton_bonds_degree.isChecked()):
+            ma = np.max([np.max(list(centrality2.values())), np.max(list(centrality.values()))])
+            for node in centrality2:
+                centrality2[node] /= ma
         labels = form_graph_bonds.checkBox_bonds_graph_labels.isChecked()
         interregion = form_graph_bonds.checkBox_bonds_interregion.isChecked()
         occupancy = form_graph_bonds.checkBox_bonds_occupancy.isChecked()
-        form.button_bonds_draw_graph.setText('Working...')
-        form.button_bonds_draw_graph.repaint()
-        hba.draw_graph(mutations=mutations, compare_to=hba2, draw_edge_occupancy=occupancy, highlight_interregion=interregion, centrality=centrality, max_centrality=weight, color_dict=color_d, draw_labels=labels, node_factor=0.6)
+        form_graph_bonds.pushButton_bonds_compare_graphs.setText('Working...')
+        form_graph_bonds.pushButton_bonds_compare_graphs.repaint()
+        hba.draw_graph(mutations=mutations, compare_to=hba2, draw_edge_occupancy=occupancy, highlight_interregion=interregion, centrality=centrality2, max_centrality=weight, color_dict=color_d, draw_labels=labels, node_factor=0.6)
         form_graph_bonds.close()
-        form.button_bonds_draw_graph.setText('Draw')
-        form.button_bonds_draw_graph.repaint()
+        form_graph_bonds.pushButton_bonds_compare_graphs.setText('Compare')
+        form_graph_bonds.pushButton_bonds_compare_graphs.repaint()
         
     def save_hbonds_graph():
         color_d={}
@@ -1366,12 +1377,12 @@ def run_plugin_gui():
         labels = form_graph_wires.checkBox_bonds_graph_labels.isChecked()
         interregion = form_graph_wires.checkBox_bonds_interregion.isChecked()
         occupancy = form_graph_wires.checkBox_bonds_occupancy.isChecked()
-        form.button_bonds_draw_graph.setText('Working...')
-        form.button_bonds_draw_graph.repaint()
+        form_graph_wires.pushButton_draw_graph.setText('Working...')
+        form_graph_wires.pushButton_draw_graph.repaint()
         wa.draw_graph(draw_edge_occupancy=occupancy, highlight_interregion=interregion, centrality=centrality, max_centrality=weight, color_dict=color_d, draw_labels=labels, node_factor=0.6)
         form_graph_wires.close()
-        form.button_bonds_draw_graph.setText('Compare')
-        form.button_bonds_draw_graph.repaint()
+        form_graph_wires.pushButton_draw_graph.setText('Draw')
+        form_graph_wires.pushButton_draw_graph.repaint()
         
     def draw_wire_graph_compare():
         filename = getOpenFileNameWithExt(dialog_graph_bonds, 'Open', filter='water wire analysis file (*.wwa);;hydrogen bond analysis file (*.hba)')
@@ -1388,18 +1399,24 @@ def run_plugin_gui():
             try: weight = float(form_graph_wires.lineEdit_bonds_color_weight.text())
             except: pass
         if form_graph_wires.radioButton_bonds_betweenness.isChecked():
-            centrality = wa.compute_centrality(centrality_type='betweenness', weight=None)
+            if form_graph_wires.checkBox_bonds_weight_centrality.isChecked(): centrality = wa.compute_centrality(centrality_type='betweenness', weight=None)
+            centrality2 = wa.compute_centrality(centrality_type='betweenness', weight=None)
         elif form_graph_wires.radioButton_bonds_degree.isChecked():
-            centrality = wa.compute_centrality(centrality_type='degree', normalize=True, weight=None)
+            if form_graph_wires.checkBox_bonds_weight_centrality.isChecked(): centrality = wa.compute_centrality(centrality_type='degree', normalize=True, weight=None)
+            centrality2 = wa.compute_centrality(centrality_type='degree', weight=None)
+        if form_graph_wires.checkBox_bonds_weight_centrality.isChecked() and (form_graph_bonds.radioButton_bonds_betweenness.isChecked() or form_graph_bonds.radioButton_bonds_degree.isChecked()):
+            ma = np.max([np.max(list(centrality2.values())), np.max(list(centrality.values()))])
+            for node in centrality2:
+                centrality2[node] /= ma
         labels = form_graph_wires.checkBox_bonds_graph_labels.isChecked()
         interregion = form_graph_wires.checkBox_bonds_interregion.isChecked()
         occupancy = form_graph_wires.checkBox_bonds_occupancy.isChecked()
-        form.button_bonds_draw_graph.setText('Working...')
-        form.button_bonds_draw_graph.repaint()
+        form_graph_wires.pushButton_bonds_compare_graphs.setText('Working...')
+        form_graph_wires.pushButton_bonds_compare_graphs.repaint()
         wa.draw_graph(mutations=mutations, compare_to=hba2, draw_edge_occupancy=occupancy, highlight_interregion=interregion, centrality=centrality, max_centrality=weight, color_dict=color_d, draw_labels=labels, node_factor=0.6)
         form_graph_wires.close()
-        form.button_bonds_draw_graph.setText('Draw')
-        form.button_bonds_draw_graph.repaint()
+        form_graph_wires.pushButton_bonds_compare_graphs.setText('Compare')
+        form_graph_wires.pushButton_bonds_compare_graphs.repaint()
     
     def save_wire_graph():
         color_d={}
