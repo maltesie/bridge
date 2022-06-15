@@ -1,3 +1,11 @@
+## DEPRECATION WARNING
+
+This implementation of the bridge analysis is deprecated and not
+maintained anymore. There is a new implementaion as a standalone Qt5
+application under
+
+https://github.com/maltesie/bridge2
+
 ## Copyright Notice and Disclaimer
 
 This program is free software: you can redistribute it and/or modify
